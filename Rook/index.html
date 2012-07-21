@@ -1,0 +1,141 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Rook!</title>
+	<meta charset='UTF-8' />
+	<style>
+		input, textarea {border:1px solid #CCC;margin:0px;padding:0px}
+
+		#body {max-width:800px;margin:auto}
+		#log {width:100%;height:400px}
+		#message {width:100%;line-height:20px}
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="Scripts/fancywebsocket.js"></script>
+	<script>
+		var Server;
+		window.permission = true;
+
+		function log( text ) {
+			$log = $('#log');
+			//Add text to log
+			$log.append(($log.val()?"\n":'')+text);
+			//Autoscroll
+			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
+		}
+
+		function send( text ) {
+			Server.send( 'message', text );
+		}
+
+		$(document).ready(function() {
+			log('Connecting...');
+			Server = new FancyWebSocket('ws://127.0.0.1:9300');
+
+			$('#newbutton').add('#leavebutton').click(function(e) {
+				var response = {};
+				response.action = $(this).val();
+				response.data = ""; 
+				message = JSON.stringify(response);
+				log( '-> You: ' + message );
+				send( message );
+			});
+			
+			$('#joinbutton').click(function(e)
+			{
+				var response = {};
+				response.action = "join"
+				response.data = {
+					game: $('#gamenumber').val(),
+					team: $('#teamnumber').val()
+				} 
+				message = JSON.stringify(response);
+				log( 'You: ' + message );
+				send( message );
+			});
+			
+			$('#bidbutton').click(function(e)
+			{
+				var response = {};
+				response.action = "game";
+				response.data = {
+					"command": "bid",
+					"arguments": $('#bidamount').val()
+				}; 
+				message = JSON.stringify(response);
+				log( 'You: ' + message );
+				send( message );
+			});
+			
+			$('#chatbutton').click(function(e)
+			{
+				var response = {};
+				response.action = "chat"
+				response.data = $('#chattext').val(); 
+				message = JSON.stringify(response);
+				log( 'You: ' + response.data);
+				send( message );
+			});
+			
+
+			//Let the user know we're connected
+			Server.bind('open', function() {
+				log( "Connected." );
+			});
+
+			//OH NOES! Disconnection occurred.
+			Server.bind('close', function( data ) {
+				log( "Disconnected." );
+			});
+
+			//Log any messages sent from server
+			Server.bind('message', function( payload ) {
+				var message = JSON.parse(payload);
+				if (message.action && (message.action == "log"))
+				{
+					log("Log: " + message.message);	
+				}
+				else if (message.action && (message.action == "chat"))
+				{			
+					log(message.message);
+				} 
+				else if (message.action && (message.action == "command"))
+				{
+					command = message.message;
+					switch(command)
+					{
+						case "losepermission":
+							window.permission = false;
+							log("Lost permission");
+							break;
+						case "gainpermission":
+							window.permission = true;
+							log("Gained permission");
+							break;
+					}
+				}
+				else
+				{
+					log(JSON.stringify(message));
+				}
+			});
+
+			Server.connect();
+		});
+	</script>
+</head>
+
+<body>
+	<div id='body'>
+		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
+		<button id="newbutton" value="new">New Game</button>
+		<button id="joinbutton" value="join">Join</button><input id="gamenumber" /><input id="teamnumber" style='width:40px;' /><br />
+		<button id="leavebutton" value="leave">Leave</button>
+		<button id="bidbutton" value="bid">Bid</button><input id="bidamount" /><br />
+		<button id="exitbutton" value="exit">Exit</button>
+		<button id="chatbutton" value="chat">Chat</button><input id="chattext" /><br />
+		
+	</div>
+</body>
+
+</html>
