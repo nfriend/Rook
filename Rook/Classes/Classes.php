@@ -69,28 +69,33 @@ class Game
 							if (getNumberOfPassedPlayers($clientInfo["game"]) == 3)
 							{
 								$round = end($this->Rounds);
+								array_push($round->Tricks, new Trick());
 								
 								if($this->Team1->Player1->HasPassed === false)
 								{
 									$round->TeamBidWinner = $this->Team1;
 									$round->PlayerBidWinner = $this->Team1->Player1;
+									$this->State->NextAction = "Team1Player1Lay";
 								}
 								if($this->Team1->Player2->HasPassed === false)
 								{
 									$round->TeamBidWinner = $this->Team1;
 									$round->PlayerBidWinner = $this->Team1->Player2;
+									$this->State->NextAction = "Team1Player2Lay";
 								}
 								if($this->Team2->Player1->HasPassed === false)
 								{
 									$round->TeamBidWinner = $this->Team2;
 									$round->PlayerBidWinner = $this->Team2->Player1;
+									$this->State->NextAction = "Team2Player1Lay";
 								}
 								if($this->Team2->Player2->HasPassed === false)
 								{
 									$round->TeamBidWinner = $this->Team2;
 									$round->PlayerBidWinner = $this->Team2->Player2;
+									$this->State->NextAction = "Team2Player2Lay";
 								}
-																	
+								
 									
 								$allClients = getAllClientIdsInGame($clientInfo["game"]);
 								
@@ -100,6 +105,23 @@ class Game
 										"action"=>"log",
 										"message"=> "Player " . (string)$round->PlayerBidWinner->ClientId . " has won the bid with a bid of " . (string)$round->Bid
 									);
+									
+									sendJson($id, $response);
+									
+									if($id != $round->PlayerBidWinner->ClientId)
+									{
+										$response = array(
+											"action"=>"command",
+											"message"=>"losepermission"											
+										);
+									}
+									else 
+									{
+										$response = array(
+											"action"=>"command",
+											"message"=>"gainpermission"											
+										);
+									}
 									
 									sendJson($id, $response);
 								}
@@ -188,21 +210,25 @@ class Game
 								{
 									$round->TeamBidWinner = $this->Team1;
 									$round->PlayerBidWinner = $this->Team1->Player1;
+									$this->State->NextAction = "Team1Player1Lay";
 								}
 								if($this->Team1->Player2->ClientId === $clientInfo["clientId"])
 								{
 									$round->TeamBidWinner = $this->Team1;
 									$round->PlayerBidWinner = $this->Team1->Player2;
+									$this->State->NextAction = "Team1Player2Lay";
 								}
 								if($this->Team2->Player1->ClientId === $clientInfo["clientId"])
 								{
 									$round->TeamBidWinner = $this->Team2;
 									$round->PlayerBidWinner = $this->Team2->Player1;
+									$this->State->NextAction = "Team2Player1Lay";
 								}
 								if($this->Team2->Player2->ClientId === $clientInfo["clientId"])
 								{
 									$round->TeamBidWinner = $this->Team2;
 									$round->PlayerBidWinner = $this->Team2->Player2;
+									$this->State->NextAction = "Team2Player2Lay";
 								}
 								
 								$allClients = getAllClientIdsInGame($clientInfo["game"]);
@@ -213,6 +239,23 @@ class Game
 										"action"=>"log",
 										"message"=> "Player " . (string)$round->PlayerBidWinner->ClientId . " has won the bid with a bid of " . (string)$round->Bid
 									);
+									
+									sendJson($id, $response);
+									
+									if($id != $round->PlayerBidWinner->ClientId)
+									{
+										$response = array(
+											"action"=>"command",
+											"message"=>"losepermission"											
+										);
+									}
+									else 
+									{
+										$response = array(
+											"action"=>"command",
+											"message"=>"gainpermission"											
+										);
+									}
 									
 									sendJson($id, $response);
 								}
@@ -238,7 +281,94 @@ class Game
 						}
 					}
 					break;
-				case "somethingelse":
+				case "lay":
+					if (($this->State->NextAction === "Team1Player1Lay" && $clientInfo["teamNumber"] === 1 && $clientInfo["playerNumber"] === 1) ||
+						($this->State->NextAction === "Team1Player2Lay" && $clientInfo["teamNumber"] === 1 && $clientInfo["playerNumber"] === 2) ||
+						($this->State->NextAction === "Team2Player1Lay" && $clientInfo["teamNumber"] === 2 && $clientInfo["playerNumber"] === 1) ||
+						($this->State->NextAction === "Team2Player2Lay" && $clientInfo["teamNumber"] === 2 && $clientInfo["playerNumber"] === 2))
+					{
+						$card = playerHasCard($clientInfo, $data["arguments"]);	
+													
+						if($card !== null)
+						{
+							$round = end($this->Rounds);	
+							$trick = end($round->Tricks);
+							
+							if(isLegalMove($clientInfo, $trick, $card))
+							{
+								array_push($trick->CardSet, $card);
+								array_push($trick->PlayerOrder, $clientInfo);
+								
+								removeCardFromHand($clientInfo["clientId"], $clientInfo["player"], $card);
+								
+								$response = array(
+									"action"=>"log",
+									"message"=>"Card laid."
+								);
+								
+								sendJson($clientInfo["clientId"], $response);
+								
+								if(count($trick->CardSet) === 4)
+								{
+									$leadSuit = $trick->CardSet[0]->Suit;
+									$highestValue = 0;
+									$highestCard;
+									
+									foreach($trick->CardSet as $card)
+									{
+										if($card->Suit === $leadSuit)
+										{
+											$cardNumber = $card->Number;
+											if($cardNumber === 1)
+											{
+												$cardNumber = 15;
+											}
+												
+											if($cardNumber > $highestValue)
+											{
+												$highestValue = $cardNumber;	
+												$highestCard = $card;
+											}
+										}		
+									}
+									
+									$key = array_search($highestCard, $trick->CardSet);
+									$winnerInfo = $trick->PlayerOrder[$key];
+									
+									$allClients = getAllClientIdsInGame($clientInfo["game"]);
+									
+									foreach($allClients as $id)
+									{
+										$response = array(
+											"action"=>"log",
+											"message"=>"The trick was won by Player " . $winnerInfo["clientId"] . " with the " . $highestCard->toString()
+										);
+										
+										sendJson($id, $response);
+									}
+								}									
+							}
+							else 
+							{
+								$response = array(
+									"action"=>"alert",
+									"message"=>"Sorry, you must follow suit."
+								);
+								
+								sendJson($clientInfo["clientId"], $response);	
+							}							
+						}
+						else
+						{
+							$response = array(
+								"action"=>"alert",
+								"message"=>"Sorry, you do not have that card in your hand."
+							);
+							
+							sendJson($clientInfo["clientId"], $response);							
+						}
+					}
+					
 					break;
 			}
 		}
@@ -298,7 +428,8 @@ class Player
 	function Player($id)
 	{
 		$this->ClientId = $id;
-		$this->HasPassed = false;		
+		$this->HasPassed = false;
+		$this->Hand = array();		
 	}
 
 }
@@ -321,11 +452,30 @@ class Round
 	public $TeamBidWinner;
 	public $PlayerBidWinner;
 	
+	public $Tricks;
+	
+	public $Trump;
+	
 	function Round()
 	{
 		$this->Score = 0;
 		$this->Bid = 75;
+		$this->Tricks = array();
 	}	
+}
+
+class Trick
+{
+	public $CardSet;
+	public $PlayerOrder;
+	
+	public $WinningTeam;
+	
+	function Trick()
+	{
+		$this->CardSet = array();
+		$this->PlayerOrder = array();
+	}
 }
 
 class GameState
@@ -384,6 +534,30 @@ class Card
 		else
 		{
 			return "Rook";	
+		}
+	}
+	
+	function getSuitAsString()
+	{
+		if($this->Suit === Suit::Black)
+		{
+			return "black";	
+		}
+		if($this->Suit === Suit::Green)
+		{
+			return "green";	
+		}
+		if($this->Suit === Suit::Yellow)
+		{
+			return "yellow";	
+		}
+		if($this->Suit === Suit::Red)
+		{
+			return "red";	
+		}
+		if($this->Suit === Suit::Rook)
+		{
+			return "rook";	
 		}
 	}
 	

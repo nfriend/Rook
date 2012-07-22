@@ -54,9 +54,6 @@ function getNextBidder($clientInfo)
 {
 	$game = $clientInfo["game"];	
 		
-	sendJson($clientInfo["clientId"], "In  here! teamNumber: " . (string)$clientInfo["teamNumber"]);
-	sendJson($clientInfo["clientId"], "In  Here! playerNumber: " . (string)$clientInfo["playerNumber"]);	
-		
 	$nextPlayer;
 	
 	for($i = 0; $i < 4; $i++)
@@ -83,9 +80,6 @@ function getNextPlayer($clientInfo)
 	$teamNumber = $clientInfo["teamNumber"];
 	$playerNumber = $clientInfo["playerNumber"];
 	$thisGame = $clientInfo["game"];
-	
-	sendJson($clientInfo["clientId"], "teamNumber: " . (string)$teamNumber);
-	sendJson($clientInfo["clientId"], "playerNumber: " . (string)$playerNumber);
 	
 	if($teamNumber === 1)
 	{
@@ -127,6 +121,101 @@ function getNumberOfPassedPlayers($game)
 
 	
 	return $count;
+}
+
+function playerHasCard($clientInfo, $data)
+{
+	$game = $clientInfo["game"];
+	$player;
+	
+	if($clientInfo["teamNumber"] === 1)
+	{
+		if($clientInfo["playerNumber"] === 1)
+		{
+			$player = $game->Team1->Player1;	
+		}
+		else
+		{
+			$player = $game->Team1->Player2;
+		}
+	}
+	else
+	{
+		if($clientInfo["playerNumber"] === 1)
+		{
+			$player = $game->Team2->Player1;
+		}
+		else
+		{
+			$player = $game->Team2->Player2;
+		}
+	}
+	
+	sendJson($clientInfo["clientId"], "all the cards in your hand:");
+	foreach($player->Hand as $card)
+	{			
+		sendJson($clientInfo["clientId"], $card->toString());
+	}
+	
+	foreach($player->Hand as $card)
+	{			
+		$cardSuit = $card->getSuitAsString();
+		if($cardSuit === $data["suit"] && ($card->Number === (int)$data["number"] || $cardSuit === "rook"))
+			return $card;
+	}
+	
+	return null;
+}
+
+function isLegalMove($clientInfo, $trick, $card)
+{
+	if(count($trick->CardSet) === 0)
+		return true;
+	
+	if($trick->CardSet[0]->Suit === $card->Suit)
+		return true;	
+		
+	$game = $clientInfo["game"];
+	$player;
+	
+	if($clientInfo["teamNumber"] === 1)
+	{
+		if($clientInfo["playerNumber"] === 1)
+		{
+			$player = $game->Team1->Player1;	
+		}
+		else
+		{
+			$player = $game->Team1->Player2;
+		}
+	}
+	else
+	{
+		if($clientInfo["playerNumber"] === 1)
+		{
+			$player = $game->Team2->Player1;
+		}
+		else
+		{
+			$player = $game->Team2->Player2;
+		}
+	}	
+	
+	foreach($player->Hand as $card)
+	{			
+		if($trick->CardSet[0]->Suit === $card->Suit)
+			return false;
+	}
+	
+	return true;
+}
+
+function removeCardFromHand($clientId, $player, $card)
+{
+	$hand = $player->Hand;			
+	$key = array_search($card, $hand);	
+	unset($hand[$key]);
+	$player->Hand = $hand;			
 }
 
 ?>

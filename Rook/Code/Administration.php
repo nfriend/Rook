@@ -9,6 +9,8 @@ function getClientGame($clientID)
 	$clientPlayerNumber = -1;
 	$clientName = "";
 	$game = null;
+	$team = null;
+	$player = null;
 	
 	foreach($gameArray as $g)
 	{
@@ -18,7 +20,9 @@ function getClientGame($clientID)
 			$clientTeamNumber = 1;
 			$clientPlayerNumber = 1;
 			$clientName = $g->Team1->Player1->Name;	
-			$game = $g;			
+			$game = $g;
+			$team = $game->Team1;
+			$player = $game->Team1->Player1;			
 			break;
 		}
 		
@@ -29,6 +33,8 @@ function getClientGame($clientID)
 			$clientPlayerNumber = 2;
 			$clientName = $g->Team1->Player2->Name;
 			$game = $g;
+			$team = $game->Team1;
+			$player = $game->Team1->Player2;
 			break;
 		}
 		
@@ -39,6 +45,8 @@ function getClientGame($clientID)
 			$clientPlayerNumber = 1;
 			$clientName = $g->Team2->Player1->Name;
 			$game = $g;
+			$team = $game->Team2;
+			$player = $game->Team2->Player1;
 			break;
 		}
 		
@@ -49,6 +57,8 @@ function getClientGame($clientID)
 			$clientPlayerNumber = 2;
 			$clientName = $g->Team2->Player2->Name;
 			$game = $g;
+			$team = $game->Team2;
+			$player = $game->Team2->Player2;
 			break;
 		}		
 	}
@@ -59,7 +69,9 @@ function getClientGame($clientID)
 		"teamNumber" => $clientTeamNumber,
 		"playerNumber" => $clientPlayerNumber,
 		"playerName" => $clientName,
-		"game" => $game		
+		"game" => $game,
+		"team" => $team,
+		"player" => $player		
 	);
 		
 	return $responseObject;
