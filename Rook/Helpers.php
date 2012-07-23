@@ -151,12 +151,6 @@ function playerHasCard($clientInfo, $data)
 		}
 	}
 	
-	sendJson($clientInfo["clientId"], "all the cards in your hand:");
-	foreach($player->Hand as $card)
-	{			
-		sendJson($clientInfo["clientId"], $card->toString());
-	}
-	
 	foreach($player->Hand as $card)
 	{			
 		$cardSuit = $card->getSuitAsString();
@@ -167,12 +161,36 @@ function playerHasCard($clientInfo, $data)
 	return null;
 }
 
+function kittyHasCard($clientInfo, $data)
+{
+	$game = $clientInfo["game"];	
+	$round = end($game->Rounds);
+	$kitty = $round->Kitty;
+	
+	foreach($kitty as $card)
+	{
+		$cardSuit = $card->getSuitAsString();
+				
+		if($cardSuit === $data["suit"] && ($card->Number === (int)$data["number"] || $cardSuit === "rook"))
+			return $card;
+	}
+	
+	return null;
+}
+
 function isLegalMove($clientInfo, $trick, $card)
 {
 	if(count($trick->CardSet) === 0)
-		return true;
-	
-	if($trick->CardSet[0]->Suit === $card->Suit)
+		return true;	
+		
+	$game = $clientInfo["game"];
+	$round = end($game->Rounds);		
+		
+	$suitLead = $trick->CardSet[0]->Suit;
+	if ($suitLead === Suit::Rook)
+		$suitLead = $round->Trump;
+		
+	if($suitLead === $card->Suit)
 		return true;	
 		
 	$game = $clientInfo["game"];
@@ -202,8 +220,8 @@ function isLegalMove($clientInfo, $trick, $card)
 	}	
 	
 	foreach($player->Hand as $card)
-	{			
-		if($trick->CardSet[0]->Suit === $card->Suit)
+	{
+		if($suitLead === $card->Suit)
 			return false;
 	}
 	
@@ -216,6 +234,201 @@ function removeCardFromHand($clientId, $player, $card)
 	$key = array_search($card, $hand);	
 	unset($hand[$key]);
 	$player->Hand = $hand;			
+}
+
+function removeCardFromKitty($game, $card)
+{
+	$round = end($game->Rounds);
+	$kitty = $round->Kitty;	
+	$key = array_search($card, $kitty);	
+	unset($kitty[$key]);
+	$round->Kitty = $kitty;
+}
+
+function setNextGameState($clientInfo)
+{
+	$clientTeam = $clientInfo["teamNumber"];
+	$clientPlayer = $clientInfo["playerNumber"];
+	$game = $clientInfo["game"];
+	
+	if($clientTeam === 1)
+	{
+		if($clientPlayer === 1)
+		{
+			$game->State->NextAction = "Team2Player1Lay";
+		}
+		else
+		{
+			$game->State->NextAction = "Team2Player2Lay";
+		}
+	}
+	else
+	{
+		if($clientPlayer === 1)
+		{
+			$game->State->NextAction = "Team1Player2Lay";
+		}
+		else
+		{
+			$game->State->NextAction = "Team1Player1Lay";
+		}
+	}
+}
+
+function moveCardsToKitty($clientInfo, $chosenHandCards, $chosenKittyCards)
+{
+	$game = $clientInfo["game"];
+	$round = end($game->Rounds);
+	$kitty = $round->Kitty;
+	$player = $clientInfo["player"];
+	$hand = $clientInfo["player"]->Hand;
+	$currentHand = array_merge($kitty, $hand);
+	$newKitty = array_merge($chosenHandCards, $chosenKittyCards);
+		
+	foreach($newKitty as $card)
+	{
+		$key = array_search($card, $currentHand);
+		unset($currentHand[$key]);
+	}
+	
+	$player->Hand = $currentHand;
+	$round->Kitty = $newKitty;
+	
+}
+
+function getSuitAsString($suit, $caps=false)
+{
+	if($suit === Suit::Black)
+	{
+		if ($caps)
+		{
+			return "Black";	
+		}
+		else 
+		{
+			return "black";
+		}
+	}
+	
+	if($suit === Suit::Red)
+	{
+		if ($caps)
+		{
+			return "Red";	
+		}
+		else 
+		{
+			return "red";
+		}
+	}
+	
+	if($suit === Suit::Yellow)
+	{
+		if ($caps)
+		{
+			return "Yellow";	
+		}
+		else 
+		{
+			return "yellow";
+		}
+	}
+	
+	if($suit === Suit::Green)
+	{
+		if ($caps)
+		{
+			return "green";	
+		}
+		else 
+		{
+			return "green";
+		}
+	}
+}
+
+//function setRookCardSuit($game)
+//{
+//	$round = end($game->Rounds);
+//	$rookCard;
+//	
+//	foreach($round->Deck as $card)
+//	{
+//		if ($card->Suit = Suit::Rook)
+//		{
+//			$rookCard = $card;
+//			break;
+//		}
+//	}
+//	
+//	$rookCard->Suit = $round->Trump;
+//}
+
+function tellClientsWhatCardsTheyHave($game)
+{
+	$id = $game->Team1->Player1->ClientId;
+	$hand = $game->Team1->Player1->Hand;
+	$allCards = "Your cards: ";
+	
+	foreach($hand as $card)
+	{
+		$allCards = $allCards . $card->toString() . ", ";
+	}
+		
+	$response = array(
+		"action"=>"log",
+		"message"=>$allCards
+	);
+
+	sendJson($id, $response);
+	
+	$id = $game->Team1->Player2->ClientId;
+	$hand = $game->Team1->Player2->Hand;
+	$allCards = "Your cards: ";
+	
+	foreach($hand as $card)
+	{
+		$allCards = $allCards . $card->toString() . ", ";
+	}
+		
+	$response = array(
+		"action"=>"log",
+		"message"=>$allCards
+	);
+
+	sendJson($id, $response);
+	
+	$id = $game->Team2->Player1->ClientId;
+	$hand = $game->Team2->Player1->Hand;
+	$allCards = "Your cards: ";
+	
+	foreach($hand as $card)
+	{
+		$allCards = $allCards . $card->toString() . ", ";
+	}
+		
+	$response = array(
+		"action"=>"log",
+		"message"=>$allCards
+	);
+
+	sendJson($id, $response);
+	
+	$id = $game->Team2->Player2->ClientId;
+	$hand = $game->Team2->Player2->Hand;
+	$allCards = "Your cards: ";
+	
+	foreach($hand as $card)
+	{
+		$allCards = $allCards . $card->toString() . ", ";
+	}
+		
+	$response = array(
+		"action"=>"log",
+		"message"=>$allCards
+	);
+
+	sendJson($id, $response);
 }
 
 ?>

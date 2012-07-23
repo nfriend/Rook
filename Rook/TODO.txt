@@ -1,0 +1,1 @@
+BUG: processCommand() crashes if someone tries to bid before a game has begun - and probably not just bidding, but anything game related.

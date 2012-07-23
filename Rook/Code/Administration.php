@@ -209,7 +209,7 @@ function joinGame($clientID, $gameNumber, $teamNumber)
 					}
 					break;
 				}
-				else 
+				elseif($teamNumber === 2) 
 				{
 					$success = $g->Team2->AddPlayer($clientID);
 					if(!$success)
@@ -299,51 +299,6 @@ function chat($clientID, $message)
 		}
 }
 
-function checkForFullGame($gameId)
-{
-	global $gameArray;
-	
-	$thisGame;	
-
-	foreach($gameArray as $g)
-	{
-		if($g->Id === $gameId)
-		{
-			$thisGame = $g;
-			break;
-		}
-	}
-	
-	if(!is_null($thisGame->Team1->Player1) && !is_null($thisGame->Team1->Player2) && !is_null($thisGame->Team2->Player1) && !is_null($thisGame->Team2->Player2))
-	{
-	
-		if($thisGame->State->Location === "lobby")
-		{
-			$thisGame->State->Location === "table";	
-		}		
-		
-		$gamePlayers = array(
-			$thisGame->Team1->Player1->ClientId,
-			$thisGame->Team1->Player2->ClientId,
-			$thisGame->Team2->Player1->ClientId,
-			$thisGame->Team2->Player2->ClientId		
-		);
-		
-		foreach($gamePlayers as $id)
-		{
-			$response = array(
-				"action"=>"log", 
-				"message"=> "Game " . (string)$thisGame->Id . " is full and will begin in 15 seconds."
-			);	
-				
-			sendJson($id, $response);	
-		}
-		
-		beginGame($thisGame);
-	}
-	
-}
-
 function beginGame($thisGame)
 {
 	$thisGame->State->NextAction = "Team1Player1Bid";	
@@ -398,7 +353,9 @@ function beginGame($thisGame)
 	{
 		$p4Cards = $p4Cards . $card->toString() . ", ";
 	}
-	foreach($thisGame->Kitty as $card)
+	
+	$round = end($thisGame->Rounds);
+	foreach($round->Kitty as $card)
 	{
 		$kittyCards = $kittyCards . $card->toString() . ", ";
 	}
@@ -447,6 +404,51 @@ function beginGame($thisGame)
 	);
 	
 	sendJson($gamePlayers["p1"], $response);
+	
+}
+
+function checkForFullGame($gameId)
+{
+	global $gameArray;
+	
+	$thisGame;	
+
+	foreach($gameArray as $g)
+	{
+		if($g->Id === $gameId)
+		{
+			$thisGame = $g;
+			break;
+		}
+	}
+	
+	if(!is_null($thisGame->Team1->Player1) && !is_null($thisGame->Team1->Player2) && !is_null($thisGame->Team2->Player1) && !is_null($thisGame->Team2->Player2))
+	{
+	
+		if($thisGame->State->Location === "lobby")
+		{
+			$thisGame->State->Location === "table";	
+		}		
+		
+		$gamePlayers = array(
+			$thisGame->Team1->Player1->ClientId,
+			$thisGame->Team1->Player2->ClientId,
+			$thisGame->Team2->Player1->ClientId,
+			$thisGame->Team2->Player2->ClientId		
+		);
+		
+		foreach($gamePlayers as $id)
+		{
+			$response = array(
+				"action"=>"log", 
+				"message"=> "Game " . (string)$thisGame->Id . " is full and will begin in 15 seconds."
+			);	
+				
+			sendJson($id, $response);	
+		}
+		
+		beginGame($thisGame);
+	}
 	
 }
 

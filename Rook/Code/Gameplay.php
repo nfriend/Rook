@@ -29,12 +29,16 @@ function deal($game)
 	
 	shuffle($deck);
 	
+	$round = end($game->Rounds);
+	$round->Deck = $deck;
+	
 	$game->Team1->Player1->Hand = array_slice($deck, 0, 10);
 	$game->Team1->Player2->Hand = array_slice($deck, 10, 10);
 	$game->Team2->Player1->Hand = array_slice($deck, 20, 10);
 	$game->Team2->Player2->Hand = array_slice($deck, 30, 10);
 	
-	$game->Kitty = array_slice($deck, 40, 44);
+	$round = end($game->Rounds);
+	$round->Kitty = array_slice($deck, 40, 44);
 	
 	
 }

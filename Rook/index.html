@@ -10,7 +10,8 @@
 		#log {width:100%;height:400px}
 		#message {width:100%;line-height:20px}
 	</style>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
+	<script src="Scripts/jquery-1.7.2.min.js"></script>
 	<script src="Scripts/fancywebsocket.js"></script>
 	<script>
 		var Server;
@@ -93,6 +94,41 @@
 				send( message );
 			});
 			
+			$('#kittybutton').click(function(e)
+			{
+				var response = {};
+				response.action = "game"
+				response.data = {
+					"command": "kitty",
+					"arguments": [
+						{
+							"suit": $('#kittysuit1').val(),
+							"number": $('#kittynumber1').val()
+						},
+						{
+							"suit": $('#kittysuit2').val(),
+							"number": $('#kittynumber2').val()
+						},
+						{
+							"suit": $('#kittysuit3').val(),
+							"number": $('#kittynumber3').val()
+						},
+						{
+							"suit": $('#kittysuit4').val(),
+							"number": $('#kittynumber4').val()
+						},
+						{
+							"suit": $('#kittysuit5').val(),
+							"number": $('#kittynumber5').val()
+						},
+					],
+					"trumpcolor": $('select option:selected').val()					
+				} 
+				message = JSON.stringify(response);
+				log( 'You: ' + message);
+				send( message );
+			});
+			
 
 			//Let the user know we're connected
 			Server.bind('open', function() {
@@ -151,6 +187,20 @@
 		<button id="exitbutton" value="exit">Exit</button>
 		<button id="chatbutton" value="chat">Chat</button><input id="chattext" /><br />
 		<button id="laybutton" value="lay">Lay</button><input id="cardsuit" /><input id="number" style='width:40px;' /><br />
+		<button id="kittybutton" value="lay">Kitty</button><br />
+			<input id="kittysuit1" /><input id="kittynumber1" style='width:40px;' /><br />
+			<input id="kittysuit2" /><input id="kittynumber2" style='width:40px;' /><br />
+			<input id="kittysuit3" /><input id="kittynumber3" style='width:40px;' /><br />
+			<input id="kittysuit4" /><input id="kittynumber4" style='width:40px;' /><br />
+			<input id="kittysuit5" /><input id="kittynumber5" style='width:40px;' /><br />
+		Trump:
+		<select>
+			<option value="green">Green</option>
+			<option value="black">Black</option>
+			<option value="red">Red</option>
+			<option value="yellow">Yellow</option>
+		</select>
+		
 		
 	</div>
 </body>
