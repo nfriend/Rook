@@ -1,0 +1,33 @@
+body
+{
+	font-family: 'Quando', serif;
+	font-size: 1.5em;
+}
+
+input
+{
+	border-radius: 4px;
+	font-family: 'Quando', serif;
+	font-size: .8em;
+	background-color: #fff9dc;
+	border-style: solid;
+	border-color: black;
+}
+
+#alertbox
+{
+	position: absolute;
+	background-color: red;
+	border-style: solid;
+	border-width: 3px;
+	border-color: #525252;
+	border-radius: 10px;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-top: 40px;
+	top: -80px;
+	color: white;		
+	left: 50%;
+	text-align: center;
+	white-space: nowrap;
+}

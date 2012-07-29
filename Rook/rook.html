@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		
+		<title>Rook!</title>
+		
+		<meta name="description" content="Rook!  An online, multiplayer card game." />
+		<meta name="author" content="Nathan Friend" />
+		<meta name="viewport" content="width=device-width; initial-scale=1.0" />
+		
+		<link rel="shortcut icon" href="favicon.ico" />		
+		<link href="Styles/stylesheet.css" rel="stylesheet" type="text/css" />
+		<link href='http://fonts.googleapis.com/css?family=Quando' rel='stylesheet' type='text/css'>
+		<link href="jQuery/css/custom-theme/jquery-ui-1.8.22.custom.css" rel='stylesheet' type="text/css" />
+		
+		<script src="jQuery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+		<script src="jQuery/js/jquery-ui-1.8.22.custom.min.js" type="text/javascript"></script>
+		<script src="Scripts/fancywebsocket.js" type="text/javascript"></script>
+			
+		<script type="text/javascript">
+			var instanceQueue = [];
+			$(init);
+			
+			function init()
+			{
+				$("#playername_button").button().click(function()
+				{
+					createAlert($("#playername").val());
+				});				
+			}
+			
+			function createAlert(message, color, textcolor)
+			{				
+				if(!color)
+				{
+					color = "red";
+				}
+				
+				if(!textcolor)
+				{
+					textcolor = "white";
+				}
+				
+				instanceQueue.push({message: message, color: color, textcolor: textcolor});
+				
+				if (instanceQueue.length > 1)
+				{
+					return;
+				}
+				else
+				{					
+					startAlert();
+				}
+				
+				function startAlert()
+				{				
+					thisMessage = instanceQueue[0].message;
+					thisColor = instanceQueue[0].color;
+					thisTextColor = instanceQueue[0].textcolor;
+					
+					$("#alertbox").html(thisMessage).css({
+						marginLeft: (function() {
+							current_width = $("#alertbox").css("width");
+							current_width = current_width.substring(0, current_width.length - 2);
+							current_width = parseInt(current_width, 10);
+							current_width = -1 * ((current_width + 40) / 2);
+							return current_width;
+						}),
+						backgroundColor: thisColor,
+						color: thisTextColor
+					}).animate({
+						top: "+=42"
+					}, 1000, function()
+					{
+						setTimeout(function()
+						{
+							$("#alertbox").animate({
+								top: "-=42"
+							}, 1000, function()
+							{
+								instanceQueue.shift();
+								if(instanceQueue.length > 0)
+								{	
+									startAlert();
+								}
+							});
+						}, 3000)
+					})
+				}
+			}			
+		</script>	
+	</head>
+
+	<body>
+		<div id="startpage">
+			<img style="position: absolute; left: 50%; margin-left: -330px; top: 40px;" src="Images/rooktext.jpg" alt="Rook!"/>
+			<img style="position: absolute; left: 50%; margin-left: 80px; top: 150px;" src="Images/bird.jpg" alt="Rook!"/>
+			<div style="position:absolute; left: 50%; margin-left: -300px; top: 370px;"><p style="margin-bottom: 2px;">Your name: </p><input id="playername" type="text" /></div>
+			<div id="playername_button" style="position:absolute; left: 50%; margin-left: -300px; top: 470px;">Enter!</div>					
+ 		</div>
+ 		
+ 		<div id="alertbox">
+ 			Please enter a valid name.
+ 		</div>
+	</body>
+</html>
