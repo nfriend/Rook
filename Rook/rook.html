@@ -37,74 +37,16 @@
  		</div>
  		<div id="lobby" style="display: none;">
  			<div id="gamecontainer">
- 				<div id="gameaccordiancontainer" style="height: 80%; overflow-y: scroll; margin-top: 20px; padding-right: 10px; display:none;">
+ 				<div id="gameaccordiancontainer" style="height: 80%; overflow-y: scroll; margin-top: 20px; padding-right: 10px; display:display;">
 	 				<div style="margin-top: 20px; margin-bottom: 20px;"> Open games:</div>
-	 				<div id="opengamesaccordian">
-	 					<h3><a href="#">Section 1</a></h3>
-							<div>
-								<p>
-								Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
-								ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
-								amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
-								odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
-								</p>
-							</div>
-							<h3><a href="#">Section 2</a></h3>
-							<div>
-								<p>
-								Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-								purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-								velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-								suscipit faucibus urna.
-								</p>
-							</div>
-							<h3><a href="#">Section 3</a></h3>
-							<div>
-								<p>
-								Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
-								Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
-								ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
-								lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
-								</p>
-								<ul>
-									<li>List item one</li>
-									<li>List item two</li>
-									<li>List item three</li>
-								</ul>
-							</div>							
-	 				</div>
+	 				<div id="gamedescription"></div>
 	 				<div id="lobbybuttonscontainer" style="position: absolute; top: 80%; margin-top: 30px;">
 	 					<div id="creategamebutton" style="float: left;">Create a game</div>	 					
 	 				</div>
 	 			</div>
-	 			<div id="ingamecontainer" style="height: 80%; margin-top: 20px; padding-right: 10px; display: display;">
+	 			<div id="ingamecontainer" style="height: 80%; margin-top: 20px; padding-right: 10px; display: none;">
 	 				<div style="margin-top: 20px; margin-bottom: 20px;"> You are in game: GameName</div>
-	 				<div id="gamedetails" style="font-size: .7em;">
-		 				
-		 				<div style="float: left;">Status:</div><br />
-		 					<ul style="margin-left: 15px; font-size: .9em">
-		 						<li>Game full, waiting for confirmation from all players</li>
-		 					</ul>
-		 				<div style="float: left;">Players in this game:</div><br />
-		 				<div id="currentparticipants">
-		 					<ul style="margin-left: 15px; font-size: .9em">
-		 						<li>You</li>
-		 						<li>Someone else</li>
-		 						<li>Another Person</li>
-		 						<li>this person</li>
-		 					</ul>
-		 				</div><br />
-		 				
-		 				<div style="float: left;">Game rules:</div><br />
-		 				<div id="currentgamerules">
-		 					<ul style="margin-left: 15px; font-size: .9em">
-		 						<li>The Rook's card value is 10.5</li>
-		 						<li>The Rook can be be played in the first trick</li>
-		 						<li>Trump is called after the kitty is viewed</li>
-		 						<li>The game is played to 500 points</li>
-		 					</ul>
-		 				</div>
-	 				</div><br />
+	 				<div id="gamedetails" style="font-size: .7em;"></div><br />
 	 				
 	 				<div id="leavegamebutton" style="float: left;">Leave game</div>
 	 				<div id="readybutton" style="float: left;">I'm ready!</div>
@@ -184,6 +126,36 @@
  				Are you sure you want to leave this game?
  			</fieldset>
  		</div>
+ 		
+	 	<div class="gamedetailstemplate gamedescription" style="display:none;">
+	 		<hr />
+	 		<div class="gamenamecontainer" style="float: left;"></div><br />				
+			<div class="gamestatuscontainer" style="float: left;"></div><br />
+			<div style="float: left;">Players in this game:</div><br />
+				<ul class="playerlist" style="margin-left: 15px; font-size: .9em">					
+				</ul>			
+			<div style="float: left;">Game rules:</div><br />			
+				<ul class="rulelist" style="margin-left: 15px; font-size: .9em">					
+				</ul>
+ 		</div>
+ 		
+ 		<div id="joingamedialog">
+ 			<div id="jointeam1container" style="float:left; width: 200px; text-align: center">
+ 				<strong>Team 1:</strong>
+ 				<div id="team1players"></div>
+ 				<br />
+ 				<div id="jointeam1button" style="font-size: .8em">Join team 1</div>
+ 				<br />
+			</div>
+ 			<div id="jointeam2container" style="float:left; width: 200px; text-align: center">
+ 				<strong>Team 2:</strong>
+ 				<div id="team2players"></div>
+ 				<br />
+ 				<div id="jointeam2button" style="font-size: .8em">Join team 2</div>
+ 				<br />
+ 			</div> 			
+ 		</div>
+ 		
  		
 	</body>
 </html>

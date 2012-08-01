@@ -77,7 +77,7 @@ function getClientGame($clientID)
 	return $responseObject;
 }
 
-function addGame($clientID)
+function addGame($clientID, $gameName)
 {
 	global $Server, $gameArray;
 	
@@ -88,10 +88,21 @@ function addGame($clientID)
 	
 	if ($clientGameId === -1)
 	{
-		$newGame = new Game();						
+		$newGame = new Game();					
 		$newGame->Team1->AddPlayer($clientID);	
-		$newGame->Id = count($gameArray);
+		//$newGame->Id = count($gameArray);
 		$gameArray[] = $newGame;
+		$ordinal = array_search($newGame, $gameArray);
+		$gameArray[$ordinal]->Id = $ordinal;
+		
+		if(is_null($gameName) || $gameName === "")
+		{
+			$gameArray[$ordinal]->Name = "Game " . (string) $ordinal; 
+		}
+		else
+		{
+			$gameArray[$ordinal]->Name = $gameName;
+		}
 		
 		$response = array(
 			"action"=>"log", 
@@ -120,6 +131,8 @@ function leaveGame($clientID)
 	$clientTeamNumber = $clientGameInfo["teamNumber"];
 	$clientPlayerNumber = $clientGameInfo["playerNumber"];
 	
+	$gameObject;
+	
 	if ($clientGameId === -1)
 	{
 		$response = array(
@@ -138,27 +151,31 @@ function leaveGame($clientID)
 			{
 				if($clientTeamNumber === 1)
 				{
-					if($clientPlayerNumber ===1)
+					if($clientPlayerNumber === 1)
 					{
 						$g->Team1->Player1 = null;
+						$gameObject = $g;
 						break;
 					}
 					else
 					{
 						$g->Team1->Player2 = null;
+						$gameObject = $g;
 						break;
 					}
 				}
 				else
 				{
-					if($clientPlayerNumber ===1)
+					if($clientPlayerNumber === 1)
 					{
 						$g->Team2->Player1 = null;
+						$gameObject = $g;
 						break;
 					}
 					else
 					{
 						$g->Team2->Player2 = null;
+						$gameObject = $g;
 						break;
 					}
 				}
@@ -169,6 +186,12 @@ function leaveGame($clientID)
 			"action"=>"log", 
 			"message"=> "Player " . (string) $clientID . " has left game " . (string) $clientGameId
 		);
+		
+		if (is_null($g->Team1->Player1) && is_null($g->Team1->Player2) && is_null($g->Team2->Player1) && is_null($g->Team2->Player2))
+		{
+			$ordinal = array_search($gameObject, $gameArray);		
+			unset($gameArray[$ordinal]);
+		}
 		
 		sendJson($clientID, $response);
 	}
@@ -200,7 +223,7 @@ function joinGame($clientID, $gameNumber, $teamNumber)
 					if(!$success)
 					{
 						$response = array(
-							"action"=>"log", 
+							"action"=>"alert", 
 							"message"=> "Player " . (string) $clientID . " is unable to join Game " . (string) $gameNumber . " on Team " . (string) $teamNumber . " because the team is full."
 						);
 						
@@ -215,7 +238,7 @@ function joinGame($clientID, $gameNumber, $teamNumber)
 					if(!$success)
 					{
 						$response = array(
-							"action"=>"log", 
+							"action"=>"alert", 
 							"message"=> "Player " . (string) $clientID . " is unable to join Game " . (string) $gameNumber . " on Team " . (string) $teamNumber . " because the team is full."
 						);
 						
@@ -230,7 +253,7 @@ function joinGame($clientID, $gameNumber, $teamNumber)
 		if($requestedGameDoesExist)
 		{
 			$response = array(
-				"action"=>"log", 
+				"action"=>"alert", 
 				"message"=> "Game " . (string) $gameNumber . " does not exist"
 			);
 			
@@ -239,8 +262,8 @@ function joinGame($clientID, $gameNumber, $teamNumber)
 		}
 			
 		$response = array(
-			"action"=>"log", 
-			"message"=> "Player " . (string) $clientID . " has joined game " . (string) $gameNumber . " on Team " . (string) $teamNumber
+			"action"=>"command", 
+			"message"=> "joinsuccess"
 		);
 		
 		sendJson($clientID, $response);	
@@ -252,8 +275,8 @@ function joinGame($clientID, $gameNumber, $teamNumber)
 	else 
 	{		
 		$response = array(
-			"action"=>"log", 
-			"message"=> "Player " . (string) $clientID . " is already in game " . (string) $clientGameId . " on Team " . (string) $clientTeamNumber
+			"action"=>"alert", 
+			"message"=> "You are already in game " . (string) $clientGameId . " on Team " . (string) $clientTeamNumber
 		);
 		
 		sendJson($clientID, $response);
@@ -262,7 +285,7 @@ function joinGame($clientID, $gameNumber, $teamNumber)
 
 function chat($clientID, $message)
 {
-	global $Server;
+	global $Server, $wsClientNames;
 	
 	$ip = long2ip( $Server->wsClients[$clientID][6] );	
 		
@@ -270,31 +293,27 @@ function chat($clientID, $message)
 	$clientGameId = $clientGameInfo["gameId"];
 	$clientTeamNumber = $clientGameInfo["teamNumber"];
 	$clientPlayerNumber = $clientGameInfo["playerNumber"];
-	$clientName = $clientGameInfo["playerName"];
+	
+	if (is_null($wsClientNames[$clientID]))
+	{
+		$clientName = "Player " . (string)$clientID;
+	}
+	else
+	{
+		$clientName = $wsClientNames[$clientID];
+	}
 	
 	foreach ( $Server->wsClients as $id => $client )
 		if ($id !== $clientID)
 		{
-			if($clientName === "")
-			{
-				$response = array(
-					"action"=>"chat", 
-					"message"=> "Player " . (string) $clientID . ": " . $message
-				);	
-					
-				sendJson($id, $response);
-				//$Server->wsSend($id, "Visitor $clientID ($ip) says \"$message\"");
-			}
-			else 
-			{
-				$response = array(
-					"action"=>"chat", 
-					"message"=> $clientName . ": " . $message
-				);	
-					
-				sendJson($id, $response);	
-				//$Server->wsSend($id, $clientName . " says \"$message\"");
-			}	
+			
+			$response = array(
+				"action"=>"chat", 
+				"message"=> $clientName . ": " . $message
+			);	
+				
+			sendJson($id, $response);	
+			//$Server->wsSend($id, $clientName . " says \"$message\"");
 				
 		}
 }
@@ -459,6 +478,53 @@ function forwardCommand($clientID, $data)
 	
 	$thisGame->processCommand($clientGameInfo, $data);
 		
+}
+
+function sendAllOpenGames($clientID)
+{
+	global $gameArray;
+	
+	$openGames = array();
+	$responseArray = array();
+	
+	foreach($gameArray as $game)
+	{
+		if(is_null($game->Team1->Player1) || is_null($game->Team1->Player2) || is_null($game->Team2->Player1) || is_null($game->Team2->Player2))
+		{
+			array_push($openGames, $game);
+		}
+	}
+	
+	foreach($openGames as $game)
+	{
+		$rules = $game->Rules;
+		$TrumpBeforeKitty = $game->TrumpBeforeKitty ? "true" : "false";
+		$NoRookOnFirstTrick = $game->NoRookOnFirstTrick ? "true" : "false";
+			
+		$gameDetails = array(
+			"name"=>(string)($game->Name),
+			"id"=>(string)($game->Id),
+			"team1player1"=>(string)($game->Team1->Player1->Name),
+			"team1player2"=>(string)($game->Team1->Player2->Name),
+			"team2player1"=>(string)($game->Team2->Player1->Name),
+			"team2player2"=>(string)($game->Team2->Player2->Name),
+			"rookvalue"=>(string)($rules->RookValue),
+			"playto"=>(string)($rules->PlayTo),
+			"trumpbeforekitty"=>$TrumpBeforeKitty,
+			"norookonfirsttrick"=>$NoRookOnFirstTrick
+		);
+		
+		array_push($responseArray, $gameDetails);
+	}
+	
+	$response = array(
+		"action"=>"command", 
+		"message"=>"allgamedetails",
+		"data"=>$responseArray
+	);
+	
+	sendJson($clientID, $response);
+	
 }
 
 ?>

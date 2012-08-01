@@ -38,7 +38,7 @@
 			$('#newbutton').add('#leavebutton').click(function(e) {
 				var response = {};
 				response.action = $(this).val();
-				response.data = ""; 
+				response.data = $("#gamename").val(); 
 				message = JSON.stringify(response);
 				log( '-> You: ' + message );
 				send( message );
@@ -182,7 +182,7 @@
 <body>
 	<div id='body'>
 		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
-		<button id="newbutton" value="new">New Game</button>
+		<button id="newbutton" value="new">New Game</button><input id="gamename" />
 		<button id="joinbutton" value="join">Join</button><input id="gamenumber" /><input id="teamnumber" style='width:40px;' /><br />
 		<button id="leavebutton" value="leave">Leave</button>
 		<button id="bidbutton" value="bid">Bid</button><input id="bidamount" /><br />

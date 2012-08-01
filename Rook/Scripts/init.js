@@ -3,6 +3,12 @@ function init() {
 
 	//Let the user know we're connected
 	Server.bind('open', function() {
+		var response = {};
+			response.action = "changename"
+			response.data = playername; 
+			message = JSON.stringify(response);
+			send( message );		
+		
 		$("#connectingpage").css("display", "none");
 		$("#lobby").css("display", "");
 	});
@@ -13,33 +19,8 @@ function init() {
 	});
 
 	//Log any messages sent from server
-	Server.bind('message', function( payload ) {
-		var message = JSON.parse(payload);
-		switch(message.action)
-		{
-			case "log":
-				log("Log: " + message.message);
-				break;
-				
-			case "chat":
-				log(message.message, "black");
-				break;
-				
-			case "command":
-				command = message.message;
-				switch(command)
-				{
-					case "losepermission":
-						window.permission = false;
-						log("Lost permission");
-						break;
-					case "gainpermission":
-						window.permission = true;
-						log("Gained permission");
-						break;
-				}
-				break;
-		}
+	Server.bind('message', function (payload) {
+		interpretServerMessage(payload);		
 	});
 	
 	$("#playername_button").button().click(function()
@@ -138,6 +119,127 @@ function init() {
 			send( message );
 			$("#lobbychatinput").val("");
 		}
+	});
+	
+	$("#joingamedialog").dialog({
+		autoOpen: false,		
+		modal: true,
+		width: 440,
+		open: function () {
+			thisDialog = $("#joingamedialog");
+			
+			thisDialog.find("#team1players").html("");
+			thisDialog.find("#team2players").html("");
+			
+			team1 = 0;
+			team2 = 0;
+			
+			thisGameId = thisDialog.data("gameid");
+						
+			for (i = 0; i < allOpenGames.length; i++)
+			{
+				if (allOpenGames[i].id === thisGameId)
+				{
+					game = allOpenGames[i];
+					break;				
+				}						
+			}
+			
+			
+			thisDialog.dialog("option", "title", "Join game " + game.name + "?");
+			
+			if (game.team1player1)
+			{
+				thisDialog.find("#team1players").append(game.team1player1 + "<br />")
+				team1++;
+			}
+			else
+			{
+				thisDialog.find("#team1players").append("(empty)" + "<br />")
+			}
+			
+			if (game.team1player2)
+			{
+				thisDialog.find("#team1players").append(game.team1player2 + "<br />")
+				team1++;
+			}
+			else
+			{
+				thisDialog.find("#team1players").append("(empty)" + "<br />")
+			}
+			
+			if (game.team2player1)
+			{
+				thisDialog.find("#team2players").append(game.team2player1 + "<br />")
+				team2++;
+			}
+			else
+			{
+				thisDialog.find("#team2players").append("(empty)" + "<br />")
+			}
+			
+			if (game.team2player2)
+			{
+				thisDialog.find("#team2players").append(game.team2player2 + "<br />")
+				team2++;
+			}
+			else
+			{
+				thisDialog.find("#team2players").append("(empty)" + "<br />")
+			}
+			
+			if (team1 === 2)
+			{
+				$("#jointeam1button").button("disable");
+			}
+			else
+			{
+				$("#jointeam1button").button("enable");
+			}
+			
+			if (team2 === 2)
+			{
+				$("#jointeam2button").button("disable");
+			}
+			else
+			{
+				$("#jointeam2button").button("enable");
+			}
+		},
+		buttons: {
+			"Cancel": function()
+			{
+				$("#joingamedialog").dialog("close");
+			}
+		}	
+	});
+	
+	$("#jointeam1button").button().click( function()
+	{
+		gameid = $("#joingamedialog").data("gameid");
+		
+		var response = {};
+			response.action = "join"
+			response.data = {
+				game: gameid,
+				team: 1
+			} 
+			message = JSON.stringify(response);			
+			send( message );
+	});
+	
+	$("#jointeam2button").button().click( function()
+	{
+		gameid = $("#joingamedialog").data("gameid");
+		
+		var response = {};
+			response.action = "join"
+			response.data = {
+				game: gameid,
+				team: 2
+			} 
+			message = JSON.stringify(response);			
+			send( message );
 	});
 	
 }

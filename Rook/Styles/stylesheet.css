@@ -27,11 +27,13 @@ input
 	padding-left: 20px;
 	padding-right: 20px;
 	padding-top: 40px;
+	padding-bottom: 5px;
 	top: -80px;
 	color: white;		
 	left: 50%;
 	text-align: center;
 	white-space: nowrap;
+	font-size: .8em;
 }
 
 #gamecontainer
@@ -95,4 +97,8 @@ input
 		
 }
 
+.gamedescription
+{
+	font-size: .6em;
+}
 

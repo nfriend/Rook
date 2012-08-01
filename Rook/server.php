@@ -5,9 +5,11 @@ set_time_limit(0);
 // include the web sockets server script (the server is started at the far bottom of this file)
 require 'References.php';
 
+$wsClientNames = array();
+
 // when a client sends data to the server
 function wsOnMessage($clientID, $message, $messageLength, $binary) {
-	global $Server, $gameArray;
+	global $Server, $gameArray, $wsClientNames;
 	$ip = long2ip( $Server->wsClients[$clientID][6] );
 	
 	$jsonMessage = json_decode($message, true);
@@ -26,7 +28,7 @@ function wsOnMessage($clientID, $message, $messageLength, $binary) {
 			
 			sendJson($clientID, $response);
 			
-			addGame($clientID);
+			addGame($clientID, (string)$data);
 			break;
 		case "join":			
 			$response = array(
@@ -51,6 +53,9 @@ function wsOnMessage($clientID, $message, $messageLength, $binary) {
 			
 			leaveGame($clientID);
 			
+			break;
+		case "changename":
+			$wsClientNames[$clientID] = (string)$data;			
 			break;
 		case "game":
 			
@@ -90,11 +95,14 @@ function wsOnOpen($clientID)
 	$ip = long2ip( $Server->wsClients[$clientID][6] );
 
 	$Server->log( "$ip ($clientID) has connected." );
+	
+	sendAllOpenGames($clientID);
 
 	//Send a join notice to everyone but the person who joined
 	foreach ( $Server->wsClients as $id => $client )
 		if ( $id != $clientID )
-			$Server->wsSend($id, "Visitor $clientID ($ip) has joined the room.");
+			$Server->wsSend($id, "Visitor $clientID ($ip) has joined the room.");		
+		
 }
 
 // when a client closes or lost connection

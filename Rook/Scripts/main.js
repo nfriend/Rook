@@ -2,6 +2,7 @@ var Server;
 window.permission = true;
 var instanceQueue = [];
 var playername = "Player";
+var allOpenGames = {};
 
 $(init);
 
@@ -84,3 +85,144 @@ function createAlert(message, color, textcolor)
 		})
 	}
 }		
+
+function interpretServerMessage( payload )
+{
+	var message = JSON.parse(payload);
+	switch(message.action)
+	{
+		case "log":
+			log("Log: " + message.message);
+			break;
+			
+		case "chat":
+			log(message.message, "black");
+			break;
+			
+		case "alert":
+			createAlert(message.message);
+			break;
+			
+		case "command":
+			command = message.message;
+			switch(command)
+			{
+				case "losepermission":
+					window.permission = false;
+					log("Lost permission");
+					break;
+				
+				case "gainpermission":
+					window.permission = true;
+					log("Gained permission");
+					break;
+					
+				case "allgamedetails":
+					allOpenGames = message.data;
+					log(printObject(allOpenGames), "green");
+					
+					for (var g in allOpenGames)
+					{	
+						game = allOpenGames[g];
+												
+						var newHtml = $(".gamedetailstemplate").clone();						
+						$(newHtml).children(".gamenamecontainer").html("Name: " + game.name);
+						$(newHtml).children(".gamestatuscontainer").html("Status: " + "changeme");
+						
+						if(game.team1player1)
+						{
+							$(newHtml).children(".playerlist").append("<li>" + game.team1player1 + "</li>");
+						}
+						
+						if(game.team1player2)
+						{
+							$(newHtml).children(".playerlist").append("<li>" + game.team1player2 + "</li>");
+						}
+						
+						if(game.team2player1)
+						{
+							$(newHtml).children(".playerlist").append("<li>" + game.team2player1 + "</li>");
+						}
+						
+						if(game.team2player2)
+						{
+							$(newHtml).children(".playerlist").append("<li>" + game.team2player2 + "</li>");
+						}
+						
+						if(game.rookvalue === "10.5")
+						{
+							$(newHtml).children(".rulelist").append("<li>" + "The Rook's card value is 10.5" + "</li>");
+						}
+						else if(game.rookvalue === "4")
+						{
+							$(newHtml).children(".rulelist").append("<li>" + "The Rook is low" + "</li>");
+						}
+						else if(game.rookvalue === "16")
+						{
+							$(newHtml).children(".rulelist").append("<li>" + "The Rook is high" + "</li>");
+						}
+						
+						if(game.norookonfirsttrick === "true")
+						{
+							$(newHtml).children(".rulelist").append("<li>" + "The Rook cannot be played in the first trick" + "</li>");
+						}
+						else
+						{
+							$(newHtml).children(".rulelist").append("<li>" + "The Rook can be played in the first trick" + "</li>");
+						}
+						
+						if(game.trumpbeforekitty === "true")
+						{
+							$(newHtml).children(".rulelist").append("<li>" + "Trump is called before the kitty is viewed" + "</li>");
+						}
+						else
+						{
+							$(newHtml).children(".rulelist").append("<li>" + "Trump is called after the kitty is viewed" + "</li>");
+						}
+						
+						if(game.playto)
+						{
+							$(newHtml).children(".rulelist").append("<li>" + "The game is played to " + game.playto + " points"+ "</li>");
+						}
+						
+						$(newHtml).attr("id", game.id);
+						
+						$(newHtml).css("display", "");
+						
+						newJoinButton = $("<div>Join this game</div>");
+						$(newJoinButton).attr( "onclick", "$('#joingamedialog').data('gameid', '" + game.id +"').dialog('open')").css("font-size", ".8em").button();						
+						
+						$(newHtml).append(newJoinButton);
+						$(newHtml).append("<hr />");
+						
+						$(newHtml).removeClass("gamedetailstemplate");
+						
+						$("#gamedescription").append(newHtml);
+					}
+					
+					break;
+				case "joinsuccess":
+					$("#joingamedialog").dialog("close");
+					$("#gameaccordiancontainer").css("display", "none");
+					$("#ingamecontainer").css("display", "");
+			}
+			break;
+			
+	}	
+}
+
+function printObject(o) {
+  var out = '';
+  for (var p in o) {
+  	if (typeof o[p] === "object")
+  	{
+  		out += p + ': { ' + printObject(o[p]) + ' }, \n';
+  	}
+  	else
+  	{
+  		out += p + ': ' + o[p] + '\n';	
+  	}    
+  }
+  return(out);
+}
+

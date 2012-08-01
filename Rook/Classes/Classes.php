@@ -1,19 +1,19 @@
 <?php
 
-/*
-	Represents a single instance of a Rook game
-*/
-
 class Game
 {
-	public $Id;	
+	public $Id;
+	
+	public $Name;	
 		
 	public $Team1;
 	public $Team2;
 
 	public $State;
 	
-	public $Rounds;	
+	public $Rounds;
+	
+	public $Rules;	
 
 	function Game()
 	{
@@ -25,6 +25,8 @@ class Game
 		$this->State = new GameState();
 		
 		$this->Rounds = array();
+		
+		$this->Rules = new Rules();
 	}
 	
 	function processCommand($clientInfo, $data)
@@ -619,15 +621,34 @@ class Team
 	
 	function AddPlayer($clientId)
 	{
-		global $Server;	
+		global $Server, $wsClientNames;	
 			
 		if (is_null($this->Player1))
 		{
 			$this->Player1 = new Player($clientId);
+			
+			if(is_null($wsClientNames[$clientId]))
+			{
+				$this->Player1->Name = "Player " . (string)$clientId;			
+			}
+			else
+			{
+				$this->Player1->Name = $wsClientNames[$clientId];	
+			}
+			
 		} 
 		elseif (is_null($this->Player2)) 
 		{
 			$this->Player2 = new Player($clientId);
+			
+			if(is_null($wsClientNames[$clientId]))
+			{
+				$this->Player2->Name = "Player " . (string)$clientId;			
+			}
+			else
+			{
+				$this->Playerw->Name = $wsClientNames[$clientId];	
+			}
 		} 
 		else 
 		{
@@ -722,6 +743,23 @@ class GameState
 		$this->Location = "lobby";
 		$this->NextAction = "begingame";
 	}
+}
+
+class Rules
+{
+	public $RookValue;
+	public $PlayTo;
+	public $TrumpBeforeKitty;
+	public $NoRookOnFirstTrick;
+	
+	function Rules()
+	{
+		$this->RookValue = 10.5;
+		$this->PlayTo = 500;
+		$this->TrumpBeforeKitty = false;
+		$this->NoRookOnFirstTrick = false;		
+	}
+	
 }
 
 final class Suit
