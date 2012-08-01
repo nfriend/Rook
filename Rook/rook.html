@@ -19,103 +19,25 @@
 		
 		<script src="jQuery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
 		<script src="jQuery/js/jquery-ui-1.8.22.custom.min.js" type="text/javascript"></script>
-		<script src="Scripts/fancywebsocket.js" type="text/javascript"></script>
+		<script src="Scripts/fancywebsocket.js" type="text/javascript"></script>			
+		<script src="Scripts/init.js" type="text/javascript"></script>
+		<script src="Scripts/main.js" type="text/javascript"></script>
 			
-		<script type="text/javascript">
-			var instanceQueue = [];
-			$(init);
-			
-			function init()
-			{
-				$("#playername_button").button().click(function()
-				{
-					createAlert($("#playername").val());
-				});		
-				
-				$("#opengamesaccordian").accordion({
-					collapsible: true,
-					autoHeight: false
-				});		
-				
-				$("#creategamebutton").button();
-				
-				$("#leavegamebutton").button({
-					disabled: true
-				});
-			}
-			
-			function createAlert(message, color, textcolor)
-			{				
-				if(!color)
-				{
-					color = "red";
-				}
-				
-				if(!textcolor)
-				{
-					textcolor = "white";
-				}
-				
-				instanceQueue.push({message: message, color: color, textcolor: textcolor});
-				
-				if (instanceQueue.length > 1)
-				{
-					return;
-				}
-				else
-				{					
-					startAlert();
-				}
-				
-				function startAlert()
-				{				
-					thisMessage = instanceQueue[0].message;
-					thisColor = instanceQueue[0].color;
-					thisTextColor = instanceQueue[0].textcolor;
-					
-					$("#alertbox").html(thisMessage).css({
-						marginLeft: (function() {
-							current_width = $("#alertbox").css("width");
-							current_width = current_width.substring(0, current_width.length - 2);
-							current_width = parseInt(current_width, 10);
-							current_width = -1 * ((current_width + 40) / 2);
-							return current_width;
-						}),
-						backgroundColor: thisColor,
-						color: thisTextColor
-					}).animate({
-						top: "+=42"
-					}, 1000, function()
-					{
-						setTimeout(function()
-						{
-							$("#alertbox").animate({
-								top: "-=42"
-							}, 1000, function()
-							{
-								instanceQueue.shift();
-								if(instanceQueue.length > 0)
-								{	
-									startAlert();
-								}
-							});
-						}, 3000)
-					})
-				}
-			}			
-		</script>	
 	</head>
 
 	<body>
-		<div id="startpage" style="display: none;">
+		<div id="startpage" style="display: display;">
 			<img style="position: absolute; left: 50%; margin-left: -330px; top: 40px;" src="Images/rooktext.jpg" alt="Rook!"/>
 			<img style="position: absolute; left: 50%; margin-left: 80px; top: 150px;" src="Images/bird.jpg" alt="Rook!"/>
 			<div style="position:absolute; left: 50%; margin-left: -300px; top: 370px;"><p style="margin-bottom: 2px;">Your name: </p><input id="playername" type="text" /></div>
 			<div id="playername_button" style="position:absolute; left: 50%; margin-left: -300px; top: 470px;">Enter!</div>					
  		</div>
- 		<div id="lobby" style="display: true;">
+ 		<div id="connectingpage" style="display: none;">
+ 			<div style="position: absolute; left: 50%; margin-left: -100px; top: 200px;">Connecting...</div> 			
+ 		</div>
+ 		<div id="lobby" style="display: none;">
  			<div id="gamecontainer">
- 				<div style="height: 80%; overflow-y: scroll; margin-top: 20px; padding-right: 10px;">
+ 				<div id="gameaccordiancontainer" style="height: 80%; overflow-y: scroll; margin-top: 20px; padding-right: 10px; display:none;">
 	 				<div style="margin-top: 20px; margin-bottom: 20px;"> Open games:</div>
 	 				<div id="opengamesaccordian">
 	 					<h3><a href="#">Section 1</a></h3>
@@ -149,266 +71,119 @@
 									<li>List item two</li>
 									<li>List item three</li>
 								</ul>
-							</div>
-							<h3><a href="#">Section 4</a></h3>
-							<div>
-								<p>
-								Cras dictum. Pellentesque habitant morbi tristique senectus et netus
-								et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
-								faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
-								mauris vel est.
-								</p>
-								<p>
-								Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
-								Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-								inceptos himenaeos.
-								</p>
-							</div>
-							<h3><a href="#">Section 1</a></h3>
-							<div>
-								<p>
-								Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
-								ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
-								amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
-								odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
-								</p>
-							</div>
-							<h3><a href="#">Section 2</a></h3>
-							<div>
-								<p>
-								Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-								purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-								velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-								suscipit faucibus urna.
-								</p>
-							</div>
-							<h3><a href="#">Section 3</a></h3>
-							<div>
-								<p>
-								Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
-								Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
-								ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
-								lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
-								</p>
-								<ul>
-									<li>List item one</li>
-									<li>List item two</li>
-									<li>List item three</li>
-								</ul>
-							</div>
-							<h3><a href="#">Section 4</a></h3>
-							<div>
-								<p>
-								Cras dictum. Pellentesque habitant morbi tristique senectus et netus
-								et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
-								faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
-								mauris vel est.
-								</p>
-								<p>
-								Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
-								Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-								inceptos himenaeos.
-								</p>
-							</div>
-							<h3><a href="#">Section 1</a></h3>
-							<div>
-								<p>
-								Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
-								ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
-								amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
-								odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
-								</p>
-							</div>
-							<h3><a href="#">Section 2</a></h3>
-							<div>
-								<p>
-								Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-								purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-								velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-								suscipit faucibus urna.
-								</p>
-							</div>
-							<h3><a href="#">Section 3</a></h3>
-							<div>
-								<p>
-								Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
-								Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
-								ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
-								lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
-								</p>
-								<ul>
-									<li>List item one</li>
-									<li>List item two</li>
-									<li>List item three</li>
-								</ul>
-							</div>
-							<h3><a href="#">Section 4</a></h3>
-							<div>
-								<p>
-								Cras dictum. Pellentesque habitant morbi tristique senectus et netus
-								et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
-								faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
-								mauris vel est.
-								</p>
-								<p>
-								Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
-								Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-								inceptos himenaeos.
-								</p>
-							</div>
-							<h3><a href="#">Section 1</a></h3>
-							<div>
-								<p>
-								Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
-								ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
-								amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
-								odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
-								</p>
-							</div>
-							<h3><a href="#">Section 2</a></h3>
-							<div>
-								<p>
-								Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-								purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-								velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-								suscipit faucibus urna.
-								</p>
-							</div>
-							<h3><a href="#">Section 3</a></h3>
-							<div>
-								<p>
-								Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
-								Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
-								ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
-								lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
-								</p>
-								<ul>
-									<li>List item one</li>
-									<li>List item two</li>
-									<li>List item three</li>
-								</ul>
-							</div>
-							<h3><a href="#">Section 4</a></h3>
-							<div>
-								<p>
-								Cras dictum. Pellentesque habitant morbi tristique senectus et netus
-								et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
-								faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
-								mauris vel est.
-								</p>
-								<p>
-								Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
-								Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-								inceptos himenaeos.
-								</p>
-							</div>
-							<h3><a href="#">Section 1</a></h3>
-							<div>
-								<p>
-								Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
-								ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
-								amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
-								odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
-								</p>
-							</div>
-							<h3><a href="#">Section 2</a></h3>
-							<div>
-								<p>
-								Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-								purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-								velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-								suscipit faucibus urna.
-								</p>
-							</div>
-							<h3><a href="#">Section 3</a></h3>
-							<div>
-								<p>
-								Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
-								Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
-								ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
-								lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
-								</p>
-								<ul>
-									<li>List item one</li>
-									<li>List item two</li>
-									<li>List item three</li>
-								</ul>
-							</div>
-							<h3><a href="#">Section 4</a></h3>
-							<div>
-								<p>
-								Cras dictum. Pellentesque habitant morbi tristique senectus et netus
-								et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
-								faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
-								mauris vel est.
-								</p>
-								<p>
-								Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
-								Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-								inceptos himenaeos.
-								</p>
-							</div>
-							<h3><a href="#">Section 1</a></h3>
-							<div>
-								<p>
-								Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
-								ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
-								amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
-								odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
-								</p>
-							</div>
-							<h3><a href="#">Section 2</a></h3>
-							<div>
-								<p>
-								Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-								purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-								velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-								suscipit faucibus urna.
-								</p>
-							</div>
-							<h3><a href="#">Section 3</a></h3>
-							<div>
-								<p>
-								Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
-								Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
-								ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
-								lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
-								</p>
-								<ul>
-									<li>List item one</li>
-									<li>List item two</li>
-									<li>List item three</li>
-								</ul>
-							</div>
-							<h3><a href="#">Section 4</a></h3>
-							<div>
-								<p>
-								Cras dictum. Pellentesque habitant morbi tristique senectus et netus
-								et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
-								faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
-								mauris vel est.
-								</p>
-								<p>
-								Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
-								Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-								inceptos himenaeos.
-								</p>
-							</div>
+							</div>							
 	 				</div>
 	 				<div id="lobbybuttonscontainer" style="position: absolute; top: 80%; margin-top: 30px;">
-	 					<div id="creategamebutton" style="float: left;">Create a game</div>
-	 					<div id="leavegamebutton" style="float: left;">Leave current game</div>
+	 					<div id="creategamebutton" style="float: left;">Create a game</div>	 					
 	 				</div>
 	 			</div>
+	 			<div id="ingamecontainer" style="height: 80%; margin-top: 20px; padding-right: 10px; display: display;">
+	 				<div style="margin-top: 20px; margin-bottom: 20px;"> You are in game: GameName</div>
+	 				<div id="gamedetails" style="font-size: .7em;">
+		 				
+		 				<div style="float: left;">Status:</div><br />
+		 					<ul style="margin-left: 15px; font-size: .9em">
+		 						<li>Game full, waiting for confirmation from all players</li>
+		 					</ul>
+		 				<div style="float: left;">Players in this game:</div><br />
+		 				<div id="currentparticipants">
+		 					<ul style="margin-left: 15px; font-size: .9em">
+		 						<li>You</li>
+		 						<li>Someone else</li>
+		 						<li>Another Person</li>
+		 						<li>this person</li>
+		 					</ul>
+		 				</div><br />
+		 				
+		 				<div style="float: left;">Game rules:</div><br />
+		 				<div id="currentgamerules">
+		 					<ul style="margin-left: 15px; font-size: .9em">
+		 						<li>The Rook's card value is 10.5</li>
+		 						<li>The Rook can be be played in the first trick</li>
+		 						<li>Trump is called after the kitty is viewed</li>
+		 						<li>The game is played to 500 points</li>
+		 					</ul>
+		 				</div>
+	 				</div><br />
+	 				
+	 				<div id="leavegamebutton" style="float: left;">Leave game</div>
+	 				<div id="readybutton" style="float: left;">I'm ready!</div>
+	 			</div>	
  			</div>
  			<div id="chatcontainer">
- 				<textarea id="lobbychatarea" readonly="readonly"></textarea>
+ 				<div id="lobbychatarea" readonly="readonly"></div>
  				<div style="margin-top: 10px; width: 100%">Chat:&nbsp;<input id="lobbychatinput" /></div>
  			</div>
  		</div>
  		
+ 		<!-- Dialogs, alertboxes, and other non-page divs -->
+ 		
  		<div id="alertbox">
  			Please enter a valid name.
  		</div>
+ 		
+ 		<div id="creategamedialog" title="Create a new game">
+ 			<fieldset>
+ 				
+ 				<p>Choose your game options and click "Create" to create a new game.</p>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Game name:</p>
+ 					<input id="gamenameinput" style="background-color: white; border-radius: 0px; border-width: 1px;" class="indentedRight" /> 					
+ 				</div>
+ 				
+ 				<div style="clear:both"></div>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Rook card value:</p>
+ 					
+ 					<select class='indentedRight'>
+ 						<option>Low</option>
+ 						<option selected="selected">10.5</option>
+ 						<option>High</option>
+ 					</select>
+ 				</div>
+ 				
+ 				<div style="clear:both"></div>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Rook can be played on first trick:</p>
+ 					<select class='indentedRight'>
+ 						<option>Yes</option>
+ 						<option>No</option>
+ 					</select>
+ 				</div>
+ 				
+ 				<div style="clear:both"></div>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Trump must be called before viewing kitty:</p>
+ 					<select class='indentedRight'>
+ 						<option>No</option>
+ 						<option>Yes</option>
+ 					</select>
+ 				</div>
+ 				
+ 				<div style="clear:both"></div>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Play to:</p>
+ 					<select class='indentedRight'>
+ 						<option>Single game</option>
+ 						<option>100 points</option>
+ 						<option>300 points</option>
+ 						<option selected="selected">500 points</option> 						
+ 					</select>
+ 				</div>
+ 				
+ 			</fieldset>
+ 		</div>
+ 		
+ 		<div id="leavegameconfirmationdialog" title="Really leave game?">
+ 			<fieldset>
+ 				Are you sure you want to leave this game?
+ 			</fieldset>
+ 		</div>
+ 		
 	</body>
 </html>
