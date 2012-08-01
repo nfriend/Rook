@@ -96,9 +96,11 @@ function init() {
 		buttons: {
 			"Yes, leave game": function()
 			{
-				$("#leavegameconfirmationdialog").dialog("close");
-				$("#gameaccordiancontainer").css("display", "");
-				$("#ingamecontainer").css("display", "none");
+				var response = {};
+					response.action = "leave";
+					response.data = "";
+					message = JSON.stringify(response);				
+				send( message );								
 			},
 			"No": function()
 			{

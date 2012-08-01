@@ -622,10 +622,13 @@ class Team
 	function AddPlayer($clientId)
 	{
 		global $Server, $wsClientNames;	
+		
+		$playerNumber;
 			
 		if (is_null($this->Player1))
 		{
 			$this->Player1 = new Player($clientId);
+			$playerNumber = 1;
 			
 			if(is_null($wsClientNames[$clientId]))
 			{
@@ -640,6 +643,7 @@ class Team
 		elseif (is_null($this->Player2)) 
 		{
 			$this->Player2 = new Player($clientId);
+			$playerNumber = 2;
 			
 			if(is_null($wsClientNames[$clientId]))
 			{
@@ -647,7 +651,7 @@ class Team
 			}
 			else
 			{
-				$this->Playerw->Name = $wsClientNames[$clientId];	
+				$this->Player2->Name = $wsClientNames[$clientId];	
 			}
 		} 
 		else 
@@ -662,7 +666,7 @@ class Team
 		
 		sendJson($clientId, $response);
 		
-		return true;
+		return $playerNumber;
 	}
 }
 

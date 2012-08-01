@@ -123,89 +123,159 @@ function interpretServerMessage( payload )
 					
 					for (var g in allOpenGames)
 					{	
-						game = allOpenGames[g];
-												
-						var newHtml = $(".gamedetailstemplate").clone();						
-						$(newHtml).children(".gamenamecontainer").html("Name: " + game.name);
-						$(newHtml).children(".gamestatuscontainer").html("Status: " + "changeme");
-						
-						if(game.team1player1)
-						{
-							$(newHtml).children(".playerlist").append("<li>" + game.team1player1 + "</li>");
-						}
-						
-						if(game.team1player2)
-						{
-							$(newHtml).children(".playerlist").append("<li>" + game.team1player2 + "</li>");
-						}
-						
-						if(game.team2player1)
-						{
-							$(newHtml).children(".playerlist").append("<li>" + game.team2player1 + "</li>");
-						}
-						
-						if(game.team2player2)
-						{
-							$(newHtml).children(".playerlist").append("<li>" + game.team2player2 + "</li>");
-						}
-						
-						if(game.rookvalue === "10.5")
-						{
-							$(newHtml).children(".rulelist").append("<li>" + "The Rook's card value is 10.5" + "</li>");
-						}
-						else if(game.rookvalue === "4")
-						{
-							$(newHtml).children(".rulelist").append("<li>" + "The Rook is low" + "</li>");
-						}
-						else if(game.rookvalue === "16")
-						{
-							$(newHtml).children(".rulelist").append("<li>" + "The Rook is high" + "</li>");
-						}
-						
-						if(game.norookonfirsttrick === "true")
-						{
-							$(newHtml).children(".rulelist").append("<li>" + "The Rook cannot be played in the first trick" + "</li>");
-						}
-						else
-						{
-							$(newHtml).children(".rulelist").append("<li>" + "The Rook can be played in the first trick" + "</li>");
-						}
-						
-						if(game.trumpbeforekitty === "true")
-						{
-							$(newHtml).children(".rulelist").append("<li>" + "Trump is called before the kitty is viewed" + "</li>");
-						}
-						else
-						{
-							$(newHtml).children(".rulelist").append("<li>" + "Trump is called after the kitty is viewed" + "</li>");
-						}
-						
-						if(game.playto)
-						{
-							$(newHtml).children(".rulelist").append("<li>" + "The game is played to " + game.playto + " points"+ "</li>");
-						}
-						
-						$(newHtml).attr("id", game.id);
-						
-						$(newHtml).css("display", "");
-						
-						newJoinButton = $("<div>Join this game</div>");
-						$(newJoinButton).attr( "onclick", "$('#joingamedialog').data('gameid', '" + game.id +"').dialog('open')").css("font-size", ".8em").button();						
-						
-						$(newHtml).append(newJoinButton);
-						$(newHtml).append("<hr />");
-						
-						$(newHtml).removeClass("gamedetailstemplate");
-						
-						$("#gamedescription").append(newHtml);
+						addGame(g);
 					}
 					
 					break;
+					
 				case "joinsuccess":
 					$("#joingamedialog").dialog("close");
+					
+					var thisGame = allOpenGames[$("#joingamedialog").data("gameid")];
+					
 					$("#gameaccordiancontainer").css("display", "none");
+					
+					$("#gametitlediv").html("You are in game '" + thisGame.name + "'");
+					$("#gamedetails .gamestatuscontainer").html("Status: " + thisGame.status)
+					
+					thisDiv = $("#gamedetails .playerlist");
+					
+					thisDiv.html("");
+					
+					if(thisGame.team1player1)
+					{
+						thisDiv.append("<li>" + thisGame.team1player1 + "</li>");						
+					}
+					
+					if(thisGame.team1player2)
+					{
+						thisDiv.append("<li>" + thisGame.team1player2 + "</li>");						
+					}
+					
+					if(thisGame.team2player1)
+					{
+						thisDiv.append("<li>" + thisGame.team2player1 + "</li>");						
+					}
+					
+					if(thisGame.team2player2)
+					{
+						thisDiv.append("<li>" + thisGame.team2player2 + "</li>");						
+					}
+					
+					ruleUl = $("#gamedetails .rulelist");
+					ruleUl.html("");
+					
+					if(thisGame.rookvalue === "10.5")
+					{
+						ruleUl.append("<li>" + "The Rook's card value is 10.5" + "</li>");
+					}
+					else if(thisGame.rookvalue === "4")
+					{
+						ruleUl.append("<li>" + "The Rook is low" + "</li>");
+					}
+					else if(thisGame.rookvalue === "16")
+					{
+						ruleUl.append("<li>" + "The Rook is high" + "</li>");
+					}
+					
+					if(thisGame.norookonfirsttrick === "true")
+					{
+						ruleUl.append("<li>" + "The Rook cannot be played in the first trick" + "</li>");
+					}
+					else
+					{
+						ruleUl.append("<li>" + "The Rook can be played in the first trick" + "</li>");
+					}
+					
+					if(thisGame.trumpbeforekitty === "true")
+					{
+						ruleUl.append("<li>" + "Trump is called before the kitty is viewed" + "</li>");
+					}
+					else
+					{
+						ruleUl.append("<li>" + "Trump is called after the kitty is viewed" + "</li>");
+					}
+					
+					if(thisGame.playto)
+					{
+						ruleUl.append("<li>" + "The game is played to " + thisGame.playto + " points"+ "</li>");
+					}
+					
+					
 					$("#ingamecontainer").css("display", "");
+					break;
+					
+				case "leavesuccess":
+					$("#leavegameconfirmationdialog").dialog("close");
+					$("#ingamecontainer").css("display", "none");
+					$("#gameaccordiancontainer").css("display", "");
+					break;			
+					
+				case "addgame":
+					addGame(null, message.data);					
+					allOpenGames.push(message.data);
+					break;
+				
+				case "deletegame":					
+					var thisGame;					
+					for(i = 0; i < allOpenGames.length; i++)
+					{
+						if(allOpenGames[i].id === message.data)
+						{
+							thisGame = allOpenGames[i];
+							break;
+						}
+					}
+					
+					$("#gamenumber" + thisGame.id).remove();
+					
+					delete(thisGame);
+					
+					break;
+					
+				case "updategame":
+					var thisGame;
+					for(i = 0; i < allOpenGames.length; i++)
+					{
+						if(allOpenGames[i].id === message.data.gameid)
+						{
+							thisGame = allOpenGames[i];
+							break;
+						}
+					}
+					
+					thisDiv = $("#gamenumber" + thisGame.id).children(".playerlist");
+					thisDiv.html("");					
+					
+					if(message.data.team1player1)
+					{
+						thisDiv.append("<li>" + message.data.team1player1 + "</li>");
+						thisGame.team1player1 = message.data.team1player1;						
+					}
+					
+					if(message.data.team1player2)
+					{
+						thisDiv.append("<li>" + message.data.team1player2 + "</li>");
+						thisGame.team1player2 = message.data.team1player2;						
+					}
+					
+					if(message.data.team2player1)
+					{
+						thisDiv.append("<li>" + message.data.team2player1 + "</li>");
+						thisGame.team2player1 = message.data.team2player1;						
+					}
+					
+					if(message.data.team2player2)
+					{
+						thisDiv.append("<li>" + message.data.team2player2 + "</li>");
+						thisGame.team2player2 = message.data.team2player2;						
+					}
+					
+					log(printObject(message.data));
+					
+					break;
 			}
+			
 			break;
 			
 	}	
@@ -224,5 +294,91 @@ function printObject(o) {
   	}    
   }
   return(out);
+}
+
+function addGame(g, details)
+{
+	if(details)
+	{
+		game = details;
+	}
+	else
+	{
+		game = allOpenGames[g];	
+	}
+												
+	var newHtml = $(".gamedetailstemplate").clone();						
+	$(newHtml).children(".gamenamecontainer").html("Name: " + game.name);
+	$(newHtml).children(".gamestatuscontainer").html("Status: " + game.status);
+	
+	if(game.team1player1)
+	{
+		$(newHtml).children(".playerlist").append("<li>" + game.team1player1 + "</li>");
+	}
+	
+	if(game.team1player2)
+	{
+		$(newHtml).children(".playerlist").append("<li>" + game.team1player2 + "</li>");
+	}
+	
+	if(game.team2player1)
+	{
+		$(newHtml).children(".playerlist").append("<li>" + game.team2player1 + "</li>");
+	}
+	
+	if(game.team2player2)
+	{
+		$(newHtml).children(".playerlist").append("<li>" + game.team2player2 + "</li>");
+	}
+	
+	if(game.rookvalue === "10.5")
+	{
+		$(newHtml).children(".rulelist").append("<li>" + "The Rook's card value is 10.5" + "</li>");
+	}
+	else if(game.rookvalue === "4")
+	{
+		$(newHtml).children(".rulelist").append("<li>" + "The Rook is low" + "</li>");
+	}
+	else if(game.rookvalue === "16")
+	{
+		$(newHtml).children(".rulelist").append("<li>" + "The Rook is high" + "</li>");
+	}
+	
+	if(game.norookonfirsttrick === "true")
+	{
+		$(newHtml).children(".rulelist").append("<li>" + "The Rook cannot be played in the first trick" + "</li>");
+	}
+	else
+	{
+		$(newHtml).children(".rulelist").append("<li>" + "The Rook can be played in the first trick" + "</li>");
+	}
+	
+	if(game.trumpbeforekitty === "true")
+	{
+		$(newHtml).children(".rulelist").append("<li>" + "Trump is called before the kitty is viewed" + "</li>");
+	}
+	else
+	{
+		$(newHtml).children(".rulelist").append("<li>" + "Trump is called after the kitty is viewed" + "</li>");
+	}
+	
+	if(game.playto)
+	{
+		$(newHtml).children(".rulelist").append("<li>" + "The game is played to " + game.playto + " points"+ "</li>");
+	}
+	
+	$(newHtml).attr("id", "gamenumber" + game.id);
+	
+	$(newHtml).css("display", "");
+	
+	newJoinButton = $("<div>Join this game</div>");
+	$(newJoinButton).attr( "onclick", "$('#joingamedialog').data('gameid', '" + game.id +"').dialog('open')").css("font-size", ".8em").button();						
+	
+	$(newHtml).append(newJoinButton);
+	$(newHtml).append("<hr />");
+	
+	$(newHtml).removeClass("gamedetailstemplate");
+	
+	$("#gamedescription").append(newHtml);
 }
 
