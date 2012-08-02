@@ -4,6 +4,7 @@ var instanceQueue = [];
 var playername = "Player";
 var allOpenGames = {};
 var currentGameId = -1;
+var hand = [];
 
 $(init);
 
@@ -90,6 +91,7 @@ function createAlert(message, color, textcolor)
 function interpretServerMessage( payload )
 {
 	var message = JSON.parse(payload);
+	
 	switch(message.action)
 	{
 		case "log":
@@ -105,6 +107,9 @@ function interpretServerMessage( payload )
 			break;
 			
 		case "command":
+			
+			log(printObject(message), green);
+			
 			command = message.message;
 			switch(command)
 			{
@@ -278,6 +283,16 @@ function interpretServerMessage( payload )
 					$(".ui-dialog-content").dialog("close");
 					$("#lobby").css("display", "none");
 					$("#gametable").css("display", "");
+					break;
+					
+				case "initializecards":
+					for(var card in message.data)
+					{
+						hand.push({
+							suit: card.suit,
+							number: card.number
+						})
+					}
 					break;
 						
 			}

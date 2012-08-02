@@ -14,7 +14,7 @@ function getClientGame($clientID)
 	
 	foreach($gameArray as $g)
 	{
-		if ($g->Team1->Player1->ClientId === $clientID)
+		if ($g && $g->Team1 && $g->Team1->Player1 && $g->Team1->Player1->ClientId === $clientID)
 		{
 			$clientGameId = $g->Id;
 			$clientTeamNumber = 1;
@@ -26,7 +26,7 @@ function getClientGame($clientID)
 			break;
 		}
 		
-		if ($g->Team1->Player2->ClientId === $clientID)
+		if ($g && $g->Team1 && $g->Team1->Player2 && $g->Team1->Player2->ClientId === $clientID)
 		{
 			$clientGameId = $g->Id;
 			$clientTeamNumber = 1;
@@ -38,7 +38,7 @@ function getClientGame($clientID)
 			break;
 		}
 		
-		if ($g->Team2->Player1->ClientId === $clientID)
+		if ($g && $g->Team2 && $g->Team2->Player1 && $g->Team2->Player1->ClientId === $clientID)
 		{
 			$clientGameId = $g->Id;
 			$clientTeamNumber = 2;
@@ -50,7 +50,7 @@ function getClientGame($clientID)
 			break;
 		}
 		
-		if ($g->Team2->Player2->ClientId === $clientID)
+		if ($g && $g->Team2 && $g->Team2->Player2 && $g->Team2->Player2->ClientId === $clientID)
 		{
 			$clientGameId = $g->Id;
 			$clientTeamNumber = 2;
@@ -156,15 +156,33 @@ function addGame($clientID, $gameDetails)
 		$rules = $gameArray[$ordinal]->Rules;
 		$TrumpBeforeKitty = $rules->TrumpBeforeKitty ? "true" : "false";
 		$NoRookOnFirstTrick = $rules->NoRookOnFirstTrick ? "true" : "false";
+		
+		$team1player1name = "";
+		$team1player2name = "";
+		$team2player1name = "";
+		$team2player2name = "";		
+		
+		if($gameArray[$ordinal] && $gameArray[$ordinal]->Team1 && $gameArray[$ordinal]->Team1->Player1) 
+			$team1player1name = $gameArray[$ordinal]->Team1->Player1->Name;
+		
+		if($gameArray[$ordinal] && $gameArray[$ordinal]->Team1 && $gameArray[$ordinal]->Team1->Player2) 
+			$team1player1name = $gameArray[$ordinal]->Team1->Player2->Name;
+		
+		if($gameArray[$ordinal] && $gameArray[$ordinal]->Team2 && $gameArray[$ordinal]->Team2->Player1) 
+			$team1player1name = $gameArray[$ordinal]->Team2->Player1->Name;
+			
+		if($gameArray[$ordinal] && $gameArray[$ordinal]->Team2 && $gameArray[$ordinal]->Team2->Player2) 
+			$team1player1name = $gameArray[$ordinal]->Team2->Player2->Name;
+		
 			
 		$gameDetails = array(
 			"name"=>(string)($gameArray[$ordinal]->Name),
 			"id"=>(string)($gameArray[$ordinal]->Id),
 			"status"=>"Waiting for 4 players",
-			"team1player1"=>(string)($gameArray[$ordinal]->Team1->Player1->Name),
-			"team1player2"=>(string)($gameArray[$ordinal]->Team1->Player2->Name),
-			"team2player1"=>(string)($gameArray[$ordinal]->Team2->Player1->Name),
-			"team2player2"=>(string)($gameArray[$ordinal]->Team2->Player2->Name),
+			"team1player1"=>(string)($team1player1name),
+			"team1player2"=>(string)($team1player2name),
+			"team2player1"=>(string)($team2player1name),
+			"team2player2"=>(string)($team2player2name),
 			"rookvalue"=>(string)($rules->RookValue),
 			"playto"=>(string)($rules->PlayTo),
 			"trumpbeforekitty"=>$TrumpBeforeKitty,
@@ -233,14 +251,12 @@ function leaveGame($clientID)
 					if($clientPlayerNumber === 1)
 					{
 						$g->Team1->Player1 = null;
-						$g->Team1->Player1->Confirmed = false;
 						$gameObject = $g;
 						break;
 					}
 					else
 					{
 						$g->Team1->Player2 = null;
-						$g->Team1->Player2->Confirmed = false;
 						$gameObject = $g;
 						break;
 					}
@@ -250,14 +266,12 @@ function leaveGame($clientID)
 					if($clientPlayerNumber === 1)
 					{
 						$g->Team2->Player1 = null;
-						$g->Team2->Player1->Confirmed = false;
 						$gameObject = $g;
 						break;
 					}
 					else
 					{
 						$g->Team2->Player2 = null;
-						$g->Team2->Player2->Confirmed = false;
 						$gameObject = $g;
 						break;
 					}
@@ -288,6 +302,24 @@ function leaveGame($clientID)
 				sendJson($id, $response);				
 			}
 		} else {
+				
+			$team1player1name = "";
+			$team1player2name = "";
+			$team2player1name = "";
+			$team2player2name = "";		
+			
+			if($g && $g->Team1 && $g->Team1->Player1) 
+				$team1player1name = $g->Team1->Player1->Name;
+			
+			if($g && $g->Team1 && $g->Team1->Player2) 
+				$team1player2name = $g->Team1->Player2->Name;
+			
+			if($g && $g->Team2 && $g->Team2->Player1) 
+				$team2player1name = $g->Team2->Player1->Name;
+				
+			if($g && $g->Team2 && $g->Team2->Player2) 
+				$team2player2name = $g->Team2->Player2->Name;	
+				
 			foreach ( $Server->wsClients as $id => $client )
 			{
 				$response = array(
@@ -295,15 +327,36 @@ function leaveGame($clientID)
 					"message"=> "updategame",
 					"data"=>array(
 						"gameid"=>(string)($g->Id),
-						"team1player1"=> (string)($g->Team1->Player1->Name),
-						"team1player2"=> (string)($g->Team1->Player2->Name),
-						"team2player1"=> (string)($g->Team2->Player1->Name),
-						"team2player2"=> (string)($g->Team2->Player2->Name)						
+						"team1player1"=> (string)($team1player1name),
+						"team1player2"=> (string)($team1player2name),
+						"team2player1"=> (string)($team2player1name),
+						"team2player2"=> (string)($team2player2name)						
 					)
 				);	
 					
 				sendJson($id, $response);			
 			}
+			
+			if(!is_null($g->Team1->Player1))
+			{
+				$g->Team1->Player1->Confirmed = false;
+			}
+			
+			if(!is_null($g->Team1->Player2))
+			{
+				$g->Team1->Player2->Confirmed = false;
+			}
+			
+			if(!is_null($g->Team2->Player1))
+			{
+				$g->Team2->Player1->Confirmed = false;
+			}
+			
+			if(!is_null($g->Team2->Player2))
+			{
+				$g->Team2->Player2->Confirmed = false;
+			}
+			
 		}
 	}
 }
@@ -373,16 +426,36 @@ function joinGame($clientID, $gameNumber, $teamNumber)
 		}
 		
 		foreach ( $Server->wsClients as $id => $client )
-		{							
+		{
+			
+			$team1player1name = "";
+			$team1player2name = "";
+			$team2player1name = "";
+			$team2player2name = "";		
+			
+			if($g && $g->Team1 && $g->Team1->Player1) 
+				$team1player1name = $g->Team1->Player1->Name;
+			
+			if($g && $g->Team1 && $g->Team1->Player2) 
+				$team1player2name = $g->Team1->Player2->Name;
+			
+			if($g && $g->Team2 && $g->Team2->Player1) 
+				$team2player1name = $g->Team2->Player1->Name;
+				
+			if($g && $g->Team2 && $g->Team2->Player2) 
+				$team2player2name = $g->Team2->Player2->Name;	
+				
+			foreach ( $Server->wsClients as $id => $client )	
+											
 			$response = array(
 				"action"=>"command", 
 				"message"=> "updategame",
 				"data"=>array(
 					"gameid"=>(string)($g->Id),
-					"team1player1"=> (string)($g->Team1->Player1->Name),
-					"team1player2"=> (string)($g->Team1->Player2->Name),
-					"team2player1"=> (string)($g->Team2->Player1->Name),
-					"team2player2"=> (string)($g->Team2->Player2->Name)						
+					"team1player1"=> (string)($team1player1name),
+					"team1player2"=> (string)($team1player2name),
+					"team2player1"=> (string)($team2player1name),
+					"team2player2"=> (string)($team2player2name)						
 				)
 			);	
 					
