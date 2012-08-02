@@ -57,7 +57,6 @@
 	 				</div><br />
 	 				
 	 				<div id="leavegamebutton" style="float: left;">Leave game</div>
-	 				<div id="readybutton" style="float: left;">I'm ready!</div>
 	 			</div>	
  			</div>
  			<div id="chatcontainer">
@@ -65,6 +64,7 @@
  				<div style="margin-top: 10px; width: 100%">Chat:&nbsp;<input id="lobbychatinput" /></div>
  			</div>
  		</div>
+ 		<div id="gametable" style="display: none;"><p>ingame</p></div>
  		
  		<!-- Dialogs, alertboxes, and other non-page divs -->
  		
@@ -87,10 +87,10 @@
  				<div>
  					<p class='indentedLeft'>Rook card value:</p>
  					
- 					<select class='indentedRight'>
- 						<option>Low</option>
- 						<option selected="selected">10.5</option>
- 						<option>High</option>
+ 					<select id="rookcardvalueinput" class='indentedRight'>
+ 						<option value="low">Low</option>
+ 						<option value="10.5" selected="selected">10.5</option>
+ 						<option value="high">High</option>
  					</select>
  				</div>
  				
@@ -98,9 +98,9 @@
  				
  				<div>
  					<p class='indentedLeft'>Rook can be played on first trick:</p>
- 					<select class='indentedRight'>
- 						<option>Yes</option>
- 						<option>No</option>
+ 					<select id="rookplayfirsttrickinput" class='indentedRight'>
+ 						<option value="yes">Yes</option>
+ 						<option value="no">No</option>
  					</select>
  				</div>
  				
@@ -108,9 +108,9 @@
  				
  				<div>
  					<p class='indentedLeft'>Trump must be called before viewing kitty:</p>
- 					<select class='indentedRight'>
- 						<option>No</option>
- 						<option>Yes</option>
+ 					<select id="trumpbeforekittyinput" class='indentedRight'>
+ 						<option value="no">No</option>
+ 						<option value="yes">Yes</option>
  					</select>
  				</div>
  				
@@ -118,11 +118,11 @@
  				
  				<div>
  					<p class='indentedLeft'>Play to:</p>
- 					<select class='indentedRight'>
- 						<option>Single game</option>
- 						<option>100 points</option>
- 						<option>300 points</option>
- 						<option selected="selected">500 points</option> 						
+ 					<select id="playtoinput" class='indentedRight'>
+ 						<option value="single">Single game</option>
+ 						<option value="100">100 points</option>
+ 						<option value="300">300 points</option>
+ 						<option value="500" selected="selected">500 points</option> 						
  					</select>
  				</div>
  				
@@ -163,6 +163,8 @@
  				<br />
  			</div> 			
  		</div>
+ 		
+ 		<div id="confirmbegingamedialog" title="Ready to begin game"></div>
  		
  		
 	</body>

@@ -28,7 +28,7 @@ function wsOnMessage($clientID, $message, $messageLength, $binary) {
 			
 			sendJson($clientID, $response);
 			
-			addGame($clientID, (string)$data);
+			addGame($clientID, $data);
 			break;
 		case "join":			
 			$response = array(
@@ -55,8 +55,27 @@ function wsOnMessage($clientID, $message, $messageLength, $binary) {
 			
 			break;
 		case "changename":
-			$wsClientNames[$clientID] = (string)$data;			
+			$wsClientNames[$clientID] = (string)$data;	
+			
+			foreach ( $Server->wsClients as $id => $client )
+			{
+				if ( $id != $clientID )
+				{
+					$response = array(
+						"action"=>"chat",
+						"message"=>(string)$data . " has entered the lobby."
+					);
+			
+					sendJson($id, $response);					
+				}
+			}
+								
 			break;
+			
+		case "confirm":
+			confirmClient($clientID);
+			break;
+			
 		case "game":
 			
 			forwardCommand($clientID, $data);
@@ -97,11 +116,6 @@ function wsOnOpen($clientID)
 	$Server->log( "$ip ($clientID) has connected." );
 	
 	sendAllOpenGames($clientID);
-
-	//Send a join notice to everyone but the person who joined
-	foreach ( $Server->wsClients as $id => $client )
-		if ( $id != $clientID )
-			$Server->wsSend($id, "Visitor $clientID ($ip) has joined the room.");		
 		
 }
 

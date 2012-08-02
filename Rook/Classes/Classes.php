@@ -676,12 +676,14 @@ class Player
 	public $Name;
 	public $Hand;
 	public $HasPassed;
+	public $Confirmed;
 	
 	function Player($id)
 	{
 		$this->ClientId = $id;
 		$this->HasPassed = false;
-		$this->Hand = array();		
+		$this->Hand = array();
+		$this->Confirmed = false;
 	}
 
 }

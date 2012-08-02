@@ -3,6 +3,7 @@ window.permission = true;
 var instanceQueue = [];
 var playername = "Player";
 var allOpenGames = {};
+var currentGameId = -1;
 
 $(init);
 
@@ -133,84 +134,46 @@ function interpretServerMessage( payload )
 					
 					var thisGame = allOpenGames[$("#joingamedialog").data("gameid")];
 					
+					currentGameId = thisGame.id;
+					
 					$("#gameaccordiancontainer").css("display", "none");
-					
-					$("#gametitlediv").html("You are in game '" + thisGame.name + "'");
-					$("#gamedetails .gamestatuscontainer").html("Status: " + thisGame.status)
-					
-					thisDiv = $("#gamedetails .playerlist");
-					
-					thisDiv.html("");
-					
-					if(thisGame.team1player1)
-					{
-						thisDiv.append("<li>" + thisGame.team1player1 + "</li>");						
-					}
-					
-					if(thisGame.team1player2)
-					{
-						thisDiv.append("<li>" + thisGame.team1player2 + "</li>");						
-					}
-					
-					if(thisGame.team2player1)
-					{
-						thisDiv.append("<li>" + thisGame.team2player1 + "</li>");						
-					}
-					
-					if(thisGame.team2player2)
-					{
-						thisDiv.append("<li>" + thisGame.team2player2 + "</li>");						
-					}
-					
-					ruleUl = $("#gamedetails .rulelist");
-					ruleUl.html("");
-					
-					if(thisGame.rookvalue === "10.5")
-					{
-						ruleUl.append("<li>" + "The Rook's card value is 10.5" + "</li>");
-					}
-					else if(thisGame.rookvalue === "4")
-					{
-						ruleUl.append("<li>" + "The Rook is low" + "</li>");
-					}
-					else if(thisGame.rookvalue === "16")
-					{
-						ruleUl.append("<li>" + "The Rook is high" + "</li>");
-					}
-					
-					if(thisGame.norookonfirsttrick === "true")
-					{
-						ruleUl.append("<li>" + "The Rook cannot be played in the first trick" + "</li>");
-					}
-					else
-					{
-						ruleUl.append("<li>" + "The Rook can be played in the first trick" + "</li>");
-					}
-					
-					if(thisGame.trumpbeforekitty === "true")
-					{
-						ruleUl.append("<li>" + "Trump is called before the kitty is viewed" + "</li>");
-					}
-					else
-					{
-						ruleUl.append("<li>" + "Trump is called after the kitty is viewed" + "</li>");
-					}
-					
-					if(thisGame.playto)
-					{
-						ruleUl.append("<li>" + "The game is played to " + thisGame.playto + " points"+ "</li>");
-					}
-					
+										
+					changeInGameDetails(thisGame);
 					
 					$("#ingamecontainer").css("display", "");
 					break;
 					
 				case "leavesuccess":
+					currentGameId = -1;
 					$("#leavegameconfirmationdialog").dialog("close");
 					$("#ingamecontainer").css("display", "none");
 					$("#gameaccordiancontainer").css("display", "");
 					break;			
 					
+				case "createsuccess":					
+					$("#creategamedialog").dialog("close");
+					
+					var thisGame;
+					
+					for(i = 0; i < allOpenGames.length; i++)
+					{
+						if(allOpenGames[i].id === message.data)
+						{
+							thisGame = allOpenGames[i];
+							break;
+						}
+					}				
+					
+					currentGameId = thisGame.id;	
+					
+					$("#gameaccordiancontainer").css("display", "none");
+					
+					changeInGameDetails(thisGame);
+					
+					$("#ingamecontainer").css("display", "");
+					
+					break;
+				
 				case "addgame":
 					addGame(null, message.data);					
 					allOpenGames.push(message.data);
@@ -234,6 +197,7 @@ function interpretServerMessage( payload )
 					break;
 					
 				case "updategame":
+					
 					var thisGame;
 					for(i = 0; i < allOpenGames.length; i++)
 					{
@@ -251,6 +215,10 @@ function interpretServerMessage( payload )
 					{
 						thisDiv.append("<li>" + message.data.team1player1 + "</li>");
 						thisGame.team1player1 = message.data.team1player1;						
+					} 
+					else
+					{
+						thisGame.team1player1 = null;
 					}
 					
 					if(message.data.team1player2)
@@ -258,11 +226,19 @@ function interpretServerMessage( payload )
 						thisDiv.append("<li>" + message.data.team1player2 + "</li>");
 						thisGame.team1player2 = message.data.team1player2;						
 					}
+					else
+					{
+						thisGame.team1player2 = null;	
+					}
 					
 					if(message.data.team2player1)
 					{
 						thisDiv.append("<li>" + message.data.team2player1 + "</li>");
 						thisGame.team2player1 = message.data.team2player1;						
+					}
+					else
+					{
+						thisGame.team2player1 = null;	
 					}
 					
 					if(message.data.team2player2)
@@ -270,10 +246,40 @@ function interpretServerMessage( payload )
 						thisDiv.append("<li>" + message.data.team2player2 + "</li>");
 						thisGame.team2player2 = message.data.team2player2;						
 					}
+					else
+					{
+						thisGame.team2player2 = null;	
+					}
 					
-					log(printObject(message.data));
+					if(thisGame.id === currentGameId)
+					{
+						thisGame.status = "Waiting for 4 players";
+						changeInGameDetails(thisGame);
+						
+						$("#confirmbegingamedialog").dialog("close");						
+					}
 					
 					break;
+					
+				case "gamefull":					
+					
+					allOpenGames[currentGameId].status = "Waiting for all players to confirm";
+					
+					$("#ingamecontainer .gamestatuscontainer").html(allOpenGames[currentGameId].status);
+					
+					if (currentGameId !== -1)
+					{
+						$("#confirmbegingamedialog").dialog("open");
+					}
+					
+					break;
+					
+				case "begingame":					
+					$(".ui-dialog-content").dialog("close");
+					$("#lobby").css("display", "none");
+					$("#gametable").css("display", "");
+					break;
+						
 			}
 			
 			break;
@@ -290,7 +296,7 @@ function printObject(o) {
   	}
   	else
   	{
-  		out += p + ': ' + o[p] + '\n';	
+  		out += p + ': ' + o[p] + ', \n';	
   	}    
   }
   return(out);
@@ -380,5 +386,74 @@ function addGame(g, details)
 	$(newHtml).removeClass("gamedetailstemplate");
 	
 	$("#gamedescription").append(newHtml);
+}
+
+function changeInGameDetails(thisGame)
+{
+	$("#gametitlediv").html("You are in game '" + thisGame.name + "'");
+	$("#gamedetails .gamestatuscontainer").html("Status: " + thisGame.status)
+	
+	thisDiv = $("#gamedetails .playerlist");
+	
+	thisDiv.html("");
+	
+	if(thisGame.team1player1)
+	{
+		thisDiv.append("<li>" + thisGame.team1player1 + "</li>");						
+	}
+	
+	if(thisGame.team1player2)
+	{
+		thisDiv.append("<li>" + thisGame.team1player2 + "</li>");						
+	}
+	
+	if(thisGame.team2player1)
+	{
+		thisDiv.append("<li>" + thisGame.team2player1 + "</li>");						
+	}
+	
+	if(thisGame.team2player2)
+	{
+		thisDiv.append("<li>" + thisGame.team2player2 + "</li>");						
+	}
+	
+	ruleUl = $("#gamedetails .rulelist");
+	ruleUl.html("");
+	
+	if(thisGame.rookvalue === "10.5")
+	{
+		ruleUl.append("<li>" + "The Rook's card value is 10.5" + "</li>");
+	}
+	else if(thisGame.rookvalue === "4")
+	{
+		ruleUl.append("<li>" + "The Rook is low" + "</li>");
+	}
+	else if(thisGame.rookvalue === "16")
+	{
+		ruleUl.append("<li>" + "The Rook is high" + "</li>");
+	}
+	
+	if(thisGame.norookonfirsttrick === "true")
+	{
+		ruleUl.append("<li>" + "The Rook cannot be played in the first trick" + "</li>");
+	}
+	else
+	{
+		ruleUl.append("<li>" + "The Rook can be played in the first trick" + "</li>");
+	}
+	
+	if(thisGame.trumpbeforekitty === "true")
+	{
+		ruleUl.append("<li>" + "Trump is called before the kitty is viewed" + "</li>");
+	}
+	else
+	{
+		ruleUl.append("<li>" + "Trump is called after the kitty is viewed" + "</li>");
+	}
+	
+	if(thisGame.playto)
+	{
+		ruleUl.append("<li>" + "The game is played to " + thisGame.playto + " points"+ "</li>");
+	}
 }
 

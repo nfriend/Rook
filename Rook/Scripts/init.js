@@ -59,10 +59,6 @@ function init() {
 		$("#leavegameconfirmationdialog").dialog("open");	
 	});
 	
-	$("#readybutton").button({
-		disabled: true
-	});
-	
 	$("#creategamedialog").dialog({
 		autoOpen: false,
 		modal: true,	
@@ -80,8 +76,19 @@ function init() {
 				}
 				else
 				{
-					$("#creategamedialog").dialog("close");
-				}						
+					var response = {};
+						response.action = "new";
+						response.data = {
+							name: $("#gamenameinput").val(),
+							rookvalue: $("#rookcardvalueinput option:selected").val(),
+							rookfirsttrick: $("#rookplayfirsttrickinput option:selected").val(),
+							trumpbeforekitty: $("#trumpbeforekittyinput option:selected").val(),
+							playto: $("#playtoinput option:selected").val()
+						}; 
+						message = JSON.stringify(response);	
+						log(printObject(response));					
+						send( message );
+						}						
 			},
 			"Cancel": function()
 			{
@@ -96,6 +103,8 @@ function init() {
 		buttons: {
 			"Yes, leave game": function()
 			{
+				$("#confirmbegingamedialog").dialog("close");
+				
 				var response = {};
 					response.action = "leave";
 					response.data = "";
@@ -243,5 +252,27 @@ function init() {
 			message = JSON.stringify(response);			
 			send( message );
 	});
+	
+	$("#confirmbegingamedialog").dialog({
+		autoOpen: false,
+		modal: true,
+		open: function() {
+			$("#confirmbegingamedialog").html("<p>This game now has four players.  Click \"Begin game\" to continue.</p>");						
+		},
+		buttons: {
+			"Begin game": function () {
+				$("#confirmbegingamedialog").html("<p>Waiting on other players to confirm...</p>");				
+				var response = {};
+					response.action = "confirm";
+					response.data = "";
+					message = JSON.stringify(response);			
+					send( message );				
+			},
+			"Leave game": function () {
+				$("#leavegameconfirmationdialog").dialog("open");
+			}
+		}
+		
+	})
 	
 }
