@@ -275,7 +275,7 @@ function init() {
 		
 	})
 	
-	$("#cardscontainer img").draggable({
+	$(".card").draggable({
         revert: function (valid)
         {
             if (!valid)
@@ -304,16 +304,20 @@ function init() {
             }
 
             $(ui.draggable).attr("dropped", "true")
+            
+            //$(ui.draggable).appendTo("#target");
+            
+            $("#target").append(ui.draggable);
 
             spaceCards();
             
-            $(ui.draggable).animate({
-                position: "absolute",
-                marginLeft: "-70px",
-                top: "100px",
-                left: "50%",
-                zIndex: 0
-            }, 100);
+            //$(ui.draggable).animate({                
+                //marginLeft: "-70px",
+                //top: "10px",
+                //top: "12px",
+                //left: "82px",
+                //zIndex: 0
+            //}, 5000);
         }, accept: function (element)
         {
             return true;
