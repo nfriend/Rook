@@ -102,3 +102,41 @@ input
 	font-size: .6em;
 }
 
+#cardscontainer
+{
+	position: absolute;
+	width: 700px;
+	margin-left: -350px;
+	left: 50%;
+	bottom: 300px;	
+	background-color: red;
+}
+
+#cardscontainer img
+{
+	position: absolute;	
+	margin-left: -70px;
+}
+
+#target
+{
+	position: absolute;
+	width: 300px;
+	height: 210px;
+	border-style: none;
+	left: 50%;
+	margin-left: -80px;
+	top: 100px;	
+}
+
+#faketarget
+{
+	position: absolute;
+	width: 160px;
+	height: 210px;
+	border-style: solid;
+	border-radius: 5px;		
+	left: 50%;
+	margin-left: -80px;
+	top: 100px;
+}

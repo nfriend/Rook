@@ -108,7 +108,7 @@ function interpretServerMessage( payload )
 			
 		case "command":
 			
-			log(printObject(message), green);
+			log(printObject(message), "green");
 			
 			command = message.message;
 			switch(command)
@@ -469,6 +469,27 @@ function changeInGameDetails(thisGame)
 	if(thisGame.playto)
 	{
 		ruleUl.append("<li>" + "The game is played to " + thisGame.playto + " points"+ "</li>");
+	}
+}
+
+function spaceCards()
+{
+	var cards = $("#cardscontainer img");
+	var notDroppedArray = [];
+	
+	cards.each(function() {
+		if(!($(this).attr("dropped") === "true"))
+		{
+			notDroppedArray.push($(this));			
+		}		
+	});
+	count = notDroppedArray.length;
+	
+	for(i = 0; i < count; i++)
+	{
+		notDroppedArray[i].animate({
+			left: (i+1)*(750/(count + 1)) + "px"
+		});		
 	}
 }
 
