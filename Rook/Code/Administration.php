@@ -550,59 +550,77 @@ function beginGame($thisGame)
 	
 	deal($thisGame);
 	
-	$p1Cards = "";
-	$p2Cards = "";
-	$p3Cards = "";
-	$p4Cards = "";
+	$p1Cards = array();
+	$p2Cards = array();
+	$p3Cards = array();
+	$p4Cards = array();
 	$kittyCards = "";
+	
+	$round = end($thisGame->Rounds);
 	
 	foreach($thisGame->Team1->Player1->Hand as $card)
 	{
-		$p1Cards = $p1Cards . $card->toString() . ", ";
+		array_push($p1Cards, array(
+			"suit"=>$card->getSuitAsString(),
+			"number"=>$card->Number
+		));						
 	}
 	foreach($thisGame->Team1->Player2->Hand as $card)
-	{
-		$p2Cards = $p2Cards . $card->toString() . ", ";
+	{		
+		array_push($p2Cards, array(
+			"suit"=>$card->getSuitAsString(),
+			"number"=>$card->Number
+		));	
+	
 	}
 	foreach($thisGame->Team2->Player1->Hand as $card)
 	{
-		$p3Cards = $p3Cards . $card->toString() . ", ";
+		array_push($p3Cards, array(
+			"suit"=>$card->getSuitAsString(),
+			"number"=>$card->Number
+		));
 	}
 	foreach($thisGame->Team2->Player2->Hand as $card)
-	{
-		$p4Cards = $p4Cards . $card->toString() . ", ";
+	{		
+		array_push($p4Cards, array(
+			"suit"=>$card->getSuitAsString(),
+			"number"=>$card->Number
+		));
 	}
-	
-	$round = end($thisGame->Rounds);
+
 	foreach($round->Kitty as $card)
 	{
 		$kittyCards = $kittyCards . $card->toString() . ", ";
 	}
 	
 	$response = array(
-		"action"=> "log",
-		"message"=> "Player 1's cards: " . $p1Cards
+		"action"=> "command",
+		"message"=> "initializecards",
+		"data"=>$p1Cards
 	);
 	
 	sendJson($thisGame->Team1->Player1->ClientId, $response);
 	
 	$response = array(
-		"action"=> "log",
-		"message"=> "Player 2's cards: " . $p2Cards
+		"action"=> "command",
+		"message"=> "initializecards",
+		"data"=>$p2Cards
 	);
 	
 	sendJson($thisGame->Team1->Player2->ClientId, $response);
 	
 	$response = array(
-		"action"=> "log",
-		"message"=> "Player 1's cards: " . $p3Cards
+		"action"=> "command",
+		"message"=> "initializecards",
+		"data"=>$p3Cards
 	);
 	
 	sendJson($thisGame->Team2->Player1->ClientId, $response);
 	
 	$response = array(
-		"action"=> "log",
-		"message"=> "Player 2's cards: " . $p4Cards
+		"action"=> "command",
+		"message"=> "initializecards",
+		"data"=>$p4Cards
 	);
 	
 	sendJson($thisGame->Team2->Player2->ClientId, $response);

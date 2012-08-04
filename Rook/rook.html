@@ -26,7 +26,7 @@
 	</head>
 
 	<body>
-		<div id="startpage" style="display: none;">
+		<div id="startpage" style="display: display;">
 			<img style="position: absolute; left: 50%; margin-left: -330px; top: 40px;" src="Images/rooktext.jpg" alt="Rook!"/>
 			<img style="position: absolute; left: 50%; margin-left: 80px; top: 150px;" src="Images/bird.jpg" alt="Rook!"/>
 			<div style="position:absolute; left: 50%; margin-left: -300px; top: 370px;"><p style="margin-bottom: 2px;">Your name: </p><input id="playername" type="text" /></div>
@@ -64,21 +64,10 @@
  				<div style="margin-top: 10px; width: 100%">Chat:&nbsp;<input id="lobbychatinput" /></div>
  			</div>
  		</div>
- 		<div id="gametable" style="display: display;">
- 			<div id="faketarget"></div>
+ 		<div id="gametable" style="display: none;">
+ 			<div id="faketarget" style="text-align: center"><p>It's your turn.</p></div>
  			<div id="target"></div>
- 			<div id="cardscontainer">
- 				<img class='card' dropped="false" src="Images/cards/Black1.jpg" />
- 				<img class='card' dropped="false" src="Images/cards/Black3.jpg" />
- 				<img class='card' dropped="false" src="Images/cards/Black5.jpg" />
- 				<img class='card' dropped="false" src="Images/cards/Black10.jpg" />
- 				<img class='card' dropped="false" src="Images/cards/Red1.jpg" />
- 				<img class='card' dropped="false" src="Images/cards/Red5.jpg" />
- 				<img class='card' dropped="false" src="Images/cards/Green5.jpg" />
- 				<img class='card' dropped="false" src="Images/cards/Rook.jpg" />
- 				<img class='card' dropped="false" src="Images/cards/Yellow10.jpg" />
- 				<img class='card' dropped="false" src="Images/cards/Yellow14.jpg" />
- 			</div> 			
+ 			<div id="cardscontainer"></div> 			
  		</div>
  		
  		<!-- Dialogs, alertboxes, and other non-page divs -->

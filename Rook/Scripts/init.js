@@ -273,27 +273,7 @@ function init() {
 			}
 		}
 		
-	})
-	
-	$(".card").draggable({
-        revert: function (valid)
-        {
-            if (!valid)
-            // if the card is dropped in a non-valid location
-            {
-                return true;
-            }
-            else
-            {
-                if ($(this).attr("dropped") === 'false')
-                {                            
-                    log("can't play that card");
-                    return true;
-                }
-                return false;
-            }
-        }
-    }).attr("dropped", "false").css("zIndex", 10);
+	})	
     
     $('#target').droppable({
         drop: function (event, ui)
@@ -304,26 +284,21 @@ function init() {
             }
 
             $(ui.draggable).attr("dropped", "true")
-            
-            //$(ui.draggable).appendTo("#target");
-            
-            $("#target").append(ui.draggable);
+			
+			$(ui.draggable).appendTo("#target");
 
             spaceCards();
             
-            //$(ui.draggable).animate({                
-                //marginLeft: "-70px",
-                //top: "10px",
-                //top: "12px",
-                //left: "82px",
-                //zIndex: 0
-            //}, 5000);
+            $(ui.draggable).css({
+                position: "absolute",
+                marginLeft: "0px",
+                left: "13px",
+                top: "13px"
+            }, 100);
         }, accept: function (element)
         {
             return true;
         }
     });
-	
-	spaceCards();	
 	
 }

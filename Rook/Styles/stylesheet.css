@@ -112,7 +112,7 @@ input
 	background-color: red;
 }
 
-.card
+#cardscontainer img
 {
 	position: absolute;	
 	margin-left: -70px;

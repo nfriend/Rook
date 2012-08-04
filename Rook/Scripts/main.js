@@ -8,6 +8,31 @@ var hand = [];
 
 $(init);
 
+String.prototype.getSuitOrdinal = function() {
+    if (this == "black") return 0;
+    if (this == "yellow") return 1;
+    if (this == "red") return 2;
+    if (this == "green") return 3;
+    if (this == "rook") return 4;
+}
+
+var sortMethod = function compare(a, b) {
+    a_suit = a.suit.getSuitOrdinal();
+    b_suit = b.suit.getSuitOrdinal();
+
+    if (a_suit === b_suit) {
+        if (a.number == "1")
+        	return 1;
+    	if (b.number == "1")
+        	return -1;
+        
+        return a.number - b.number;
+    }
+    else {
+        return a_suit - b_suit;
+    }
+}
+
 function log(text, color) {
 						
 	text = text.replace(/:D/g, '<img style="vertical-align:middle;" src="http://www.animated-gifs.eu/anisigns/signer/laughing/laughing.gif" />');
@@ -286,13 +311,58 @@ function interpretServerMessage( payload )
 					break;
 					
 				case "initializecards":
-					for(var card in message.data)
+					for(var p in message.data)
 					{
+						card = message.data[p]; 
+						
 						hand.push({
 							suit: card.suit,
 							number: card.number
-						})
+						});						
 					}
+					
+					hand.sort(sortMethod);
+					
+					for(i = 0; i < hand.length; i++)
+					{						
+						card = hand[i];
+						
+						if(card.suit == "rook")
+						{
+							var cardToAdd = $('<img dropped="false" src="Images/cards/rook.jpg" />');
+							cardToAdd.data('suit', 'rook').data('number', 10.5);
+						}
+						else
+						{
+							var cardToAdd = $('<img dropped="false" src="Images/cards/' + card.suit + card.number + '.jpg" />');
+							cardToAdd.data('suit', card.suit).data('number', card.number);
+						}
+						
+						$("#cardscontainer").append(cardToAdd);
+					}
+					
+					$("#cardscontainer img").draggable({
+				        revert: function (valid)
+				        {
+				            if (!valid)
+				            // if the card is dropped in a non-valid location
+				            {
+				                return true;
+				            }
+				            else
+				            {
+				                if ($(this).attr("dropped") === 'false')
+				                {                            
+				                    log("can't play that card");
+				                    return true;
+				                }
+				                return false;
+				            }
+				        }
+				    }).attr("dropped", "false").css("zIndex", 10);
+				    
+				    spaceCards();
+					
 					break;
 						
 			}
@@ -492,4 +562,5 @@ function spaceCards()
 		});		
 	}
 }
+
 
