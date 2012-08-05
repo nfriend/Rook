@@ -140,3 +140,71 @@ input
 	margin-left: -80px;
 	top: 100px;
 }
+
+#currentbidcontainer
+{
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	bottom: 400px;
+}
+
+#yourbidcontainer
+{
+	position: absolute;
+	left: 50%;
+	margin-left: -240px;	
+	text-align: center;
+	bottom: 320px;
+}
+
+#bidbutton
+{
+	position: absolute;
+	bottom: 342px;
+	left: 50%;
+	margin-left: 100px;
+}
+
+#passbutton
+{
+	position: absolute;
+	bottom: 342px;
+	left: 50%;
+	margin-left: 160px;
+}
+
+#newsfeed
+{
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	bottom: 346px;
+}
+
+#submitkitty
+{
+	position: absolute;
+	left: 50%;
+	margin-left: -145px;
+	bottom: 520px;		
+}
+
+#trumpselector
+{
+	position: absolute;
+	left: 50%;
+	margin-left: -152px;
+	bottom: 400px;
+}
+
+.trumpoption
+{	
+	border-style: solid;
+	margin: 10px;
+	height: 50px;
+	width: 50px;
+	float: left;
+	cursor: pointer;	
+}
+

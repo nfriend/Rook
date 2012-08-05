@@ -65,8 +65,26 @@
  			</div>
  		</div>
  		<div id="gametable" style="display: none;">
- 			<div id="faketarget" style="text-align: center"><p>It's your turn.</p></div>
+ 			<div id="faketarget" style="text-align: center; display: none"><p>It's your turn.</p></div>
  			<div id="target"></div>
+ 			<div id="currentbidcontainer"></div>
+ 			<div id="bidcontainer" style="display:none">	 			
+	 			<div id="yourbidcontainer"><p>It's your turn to bid: <input style="width: 50px;" id="yourbid"/></p></div>
+	 			<div id="bidbutton">Bid</div> 		
+	 			<div id="passbutton">Pass</div>
+ 			</div>
+ 			<div id="newsfeed"></div>
+ 			<div id="submitkitty" style="display: none">Submit kitty and trump selection</div>
+ 			<div id="trumpselector" style="display: none">
+ 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trump color:
+ 				<div id="trumpoptions">
+ 					<div class="trumpoption" style="background-color: black" trumpcolor="black"></div>
+ 					<div class="trumpoption" style="background-color: red" trumpcolor="red"></div>
+ 					<div class="trumpoption" style="background-color: yellow" trumpcolor="yellow"></div>
+ 					<div class="trumpoption" style="background-color: green" trumpcolor="green"></div>
+				</div>
+ 			</div>
+ 				 			
  			<div id="cardscontainer"></div> 			
  		</div>
  		

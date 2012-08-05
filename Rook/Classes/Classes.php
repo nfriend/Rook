@@ -44,7 +44,7 @@ class Game
 					{						
 						if ((string)$data["arguments"] === "pass")
 						// the player passes instead of bids
-						{
+						{		
 							if($clientInfo["teamNumber"] === 1)
 							{
 								if($clientInfo["playerNumber"] === 1)
@@ -103,48 +103,117 @@ class Game
 								$allClients = getAllClientIdsInGame($clientInfo["game"]);
 								
 								foreach($allClients as $id)
-								{
-									$response = array(
-										"action"=>"log",
-										"message"=> "Player " . (string)$round->PlayerBidWinner->ClientId . " has won the bid with a bid of " . (string)$round->Bid
-									);
-									
-									sendJson($id, $response);
-									
+								{	
 									if($id != $round->PlayerBidWinner->ClientId)
 									{
 										$response = array(
 											"action"=>"command",
-											"message"=>"losepermission"											
+											"message"=>"waitforkitty",
+											"data"=>array(
+												"bid"=> $round->Bid,
+												"bidwinner"=> $round->PlayerBidWinner->Name
+											)											
 										);
+										
+										sendJson($id, $response);										
+										
+										$response = array(
+											"action"=>"command",
+											"message"=>"losepermission"
+										);									
+											
+										sendJson($id, $response);	
 									}
 									else 
 									{
+										$kittyCards = array();
+											
+										foreach($round->Kitty as $card)
+										{
+											array_push($kittyCards, array(
+												"suit"=>$card->getSuitAsString(),
+												"number"=>$card->Number
+											));
+										}
+										
 										$response = array(
 											"action"=>"command",
-											"message"=>"gainpermission"											
+											"message"=>"kitty",
+											"data"=>$kittyCards											
 										);
+										
+										sendJson($id, $response);
+										
+										$response = array(
+											"action"=>"command",
+											"message"=>"gainpermission"
+										);
+										
+										sendJson($id, $response);
 									}
-									
-									sendJson($id, $response);
 								}
 								
 							}
-							else 
+							else
+							// not everyone has passed 
 							{
-								$response = array(
-									"action"=>"command",
-									"message"=>"losepermission"
-								);
+								$round = end($this->Rounds);	
 								
-								sendJson($clientInfo["clientId"], $response);
-								
-								$response = array(
-									"action"=>"command",
-									"message"=>"gainpermission"
-								);
+								$allClients = getAllClientIdsInGame($clientInfo["game"]);
+								$nextClientId = getNextBidder($clientInfo); 
 									
-								sendJson(getNextBidder($clientInfo), $response);	
+								foreach($allClients as $thisClient)
+								{
+									$response = array(
+										"action"=>"command",
+										"message"=>"newsfeed", 
+										"data" => $clientInfo["player"]->Name . " has passed"
+									);
+									
+									sendJson($thisClient, $response);	
+										
+									if($thisClient === $nextClientId)
+									{
+										$response = array(
+											"action"=>"command",
+											"message"=>"gainpermission"
+										);									
+											
+										sendJson($nextClientId, $response);	
+										
+										$response = array(
+											"action"=>"command",
+											"message"=>"yourbid",
+											"data"=> array(
+												"bid"=> $round->Bid,
+												"highestbidder"=> $round->CurrentHighestBidder->Name
+											)
+										);
+										
+										sendJson($nextClientId, $response);
+									
+									}	
+									else
+									{
+										$response = array(
+											"action"=>"command",
+											"message"=>"losepermission"
+										);
+										
+										sendJson($thisClient, $response);
+										
+										$response = array(
+											"action"=>"command",
+											"message"=>"notyourbid",
+											"data"=> array(
+												"bid"=> $round->Bid,
+												"highestbidder"=> $round->CurrentHighestBidder->Name
+											)
+										);
+										
+										sendJson($thisClient, $response);
+									}												
+								}
 							}							
 						}
 						elseif ($data["arguments"] % 5 === 0)
@@ -156,55 +225,62 @@ class Game
 							// make sure the bid is within the correct bounds
 							{
 								$round->Bid = (int)$data["arguments"];
+								$round->CurrentHighestBidder = $clientInfo["player"];
 								
 								$allClients = getAllClientIdsInGame($clientInfo["game"]);
+								$nextClientId = getNextBidder($clientInfo);
 								
 								foreach($allClients as $id)
 								{
 									$response = array(
-										"action"=>"log",
-										"message"=>"The bid is now at " . (string)$round->Bid
-									);
-									
-									sendJson($id, $response);
-								}
-									
-								$response = array(
-									"action"=>"command",
-									"message"=>"losepermission"
-								);
-								
-								sendJson($clientInfo["clientId"], $response);
-								
-								$response = array(
-									"action"=>"command",
-									"message"=>"gainpermission"
-								);
-									
-								sendJson(getNextClientId($clientInfo), $response);
-								
-								if($clientInfo["teamNumber"] === 1)
-								{
-									if($clientInfo["playerNumber"] === 1)
+										"action"=>"command",
+										"message"=>"newsfeed", 
+										"data"=>$clientInfo["player"]->Name . " just bid " . (string)$round->Bid
+										);
+										
+									sendJson($id, $response);	
+										
+									if ($nextClientId === $id)
 									{
-										$this->State->NextAction = "Team2Player1Bid";	
-									}	
-									else
-									{
-										$this->State->NextAction = "Team2Player2Bid";	
-									}									
-								}
-								else
-								{
-									if($clientInfo["playerNumber"] === 1)
-									{
-										$this->State->NextAction = "Team1Player2Bid";	
-									}	
-									else
-									{
-										$this->State->NextAction = "Team1Player1Bid";	
+										$response = array(
+											"action"=>"command",
+											"message"=>"gainpermission"
+										);
+											
+										sendJson($id, $response);
+										
+										$response = array(
+											"action"=>"command",
+											"message"=>"yourbid",
+											"data"=> array(
+												"bid"=> $round->Bid,
+												"highestbidder"=> $round->CurrentHighestBidder->Name
+											)
+										);
+										
+										sendJson($id, $response);	
 									}
-								}									
+									else
+									{
+										$response = array(
+											"action"=>"command",
+											"message"=>"losepermission"
+										);
+										
+										sendJson($id, $response);
+										
+										$response = array(
+											"action"=>"command",
+											"message"=>"notyourbid",
+											"data"=> array(
+												"bid"=> $round->Bid,
+												"highestbidder"=> $round->CurrentHighestBidder->Name
+											)
+										);
+										
+										sendJson($id, $response);
+									}
+								}													
 							}
 							elseif((int)$data["arguments"] === 180)
 							// check to see if the player bid 180 exactly
@@ -241,26 +317,34 @@ class Game
 								$allClients = getAllClientIdsInGame($clientInfo["game"]);
 								
 								foreach($allClients as $id)
-								{
-									$response = array(
-										"action"=>"log",
-										"message"=> "Player " . (string)$round->PlayerBidWinner->ClientId . " has won the bid with a bid of " . (string)$round->Bid
-									);
-									
-									sendJson($id, $response);
-									
+								{	
 									if($id != $round->PlayerBidWinner->ClientId)
 									{
 										$response = array(
 											"action"=>"command",
-											"message"=>"losepermission"											
+											"message"=>"waitforkitty",
+											"data"=>array(
+												"bid"=> $round->Bid,
+												"bidwinner"=> $round->PlayerBidWinner->Name
+											)											
 										);
 									}
 									else 
 									{
+										$kittyCards = array();
+											
+										foreach($round->Kitty as $card)
+										{
+											array_push($kittyCards, array(
+												"suit"=>$card->getSuitAsString(),
+												"number"=>$card->Number
+											));
+										}
+										
 										$response = array(
 											"action"=>"command",
-											"message"=>"gainpermission"											
+											"message"=>"kitty",
+											"data"=>$kittyCards											
 										);
 									}
 									
@@ -363,11 +447,21 @@ class Game
 							$round = end($this->Rounds);
 							$trumpColor = getSuitAsString($round->Trump, true);
 							
+							if(checkIfPointsInKitty($clientInfo))
+							{
+								$messageString = "There are points in the kitty.";
+							}
+							else
+							{
+								$messageString = "There are no points in the kitty.";
+							}
+							
 							foreach($allClients as $id)
 							{											
 								$response = array(
-									"action"=>"log",
-									"message"=>"Player " . (string)$clientInfo["clientId"] . " is finished with the kitty, and trump is " . $trumpColor
+									"action"=>"command",
+									"message"=>"newsfeed",
+									"data"=> (string)$clientInfo["player"]->Name . " is finished with the kitty, and trump is " . $trumpColor . ". " . $messageString
 								);
 								
 								sendJson($id, $response);							
@@ -684,6 +778,7 @@ class Player
 		$this->HasPassed = false;
 		$this->Hand = array();
 		$this->Confirmed = false;
+		$this->Name = "Player";
 	}
 
 }
@@ -705,6 +800,9 @@ class Round
 	
 	public $TeamBidWinner;
 	public $PlayerBidWinner;
+	
+	// a player object
+	public $CurrentHighestBidder;
 	
 	public $Tricks;
 	

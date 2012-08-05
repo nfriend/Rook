@@ -94,13 +94,13 @@ function createAlert(message, color, textcolor)
 			color: thisTextColor
 		}).animate({
 			top: "+=42"
-		}, 1000, function()
+		}, 500, function()
 		{
 			setTimeout(function()
 			{
 				$("#alertbox").animate({
 					top: "-=42"
-				}, 1000, function()
+				}, 500, function()
 				{
 					instanceQueue.shift();
 					if(instanceQueue.length > 0)
@@ -108,7 +108,7 @@ function createAlert(message, color, textcolor)
 						startAlert();
 					}
 				});
-			}, 3000)
+			}, 2500)
 		})
 	}
 }		
@@ -311,57 +311,82 @@ function interpretServerMessage( payload )
 					break;
 					
 				case "initializecards":
-					for(var p in message.data)
-					{
-						card = message.data[p]; 
-						
-						hand.push({
-							suit: card.suit,
-							number: card.number
-						});						
-					}
+					initializeCards(message);
+					$("#newsfeed").css("display", "").html("Waiting for the first player to begin bidding...");															
+					break;
 					
-					hand.sort(sortMethod);
+				case "yourbid":
+					$("#bidcontainer").css("display", "");					
+					$("#newsfeed").css("display", "none");
+					$("#currentbidcontainer").html(message.data.highestbidder + " currently has the bid at " + message.data.bid);				
+					break;
 					
-					for(i = 0; i < hand.length; i++)
-					{						
-						card = hand[i];
+				case "notyourbid":
+					$("#bidcontainer").css("display", "none");							
+					$("#currentbidcontainer").html(message.data.highestbidder + " currently has the bid at " + message.data.bid);
+					break;
+					
+				case "newsfeed":
+					$("#newsfeed").css("display", "").html(message.data);
+					$("#bidcontainer").css("display", "none");	
+					break;
+					
+				case "waitforkitty":
+					$("#currentbidcontainer").css("display", "none");
+					$("#bidcontainer").css("display", "none");
+					$("#newsfeed").css("display", "").html(message.data.bidwinner + " has won the bid at " + message.data.bid + ".  The game will begin when " + message.data.bidwinner + " has finished with the kitty.");
+					break;
+				
+				case "kitty":
+					$("#currentbidcontainer").css("display", "none");
+					$("#newsfeed").css("display", "").html("You won the bid! The kitty has been added to your hand.  Select five cards to place back into the kitty.");
+					$("#submitkitty").css("display", "");
+					$("#trumpselector").css("display", "");
+					
+					initializeCards(message);
+					
+					$(".card").click( function(event) 
+					{	
+						chosenCount = 0;
 						
-						if(card.suit == "rook")
+						$(".card").each( function()
+						{	
+							if ($(this).data("chosenforkitty") === "true")
+							{
+								chosenCount++;
+							}						
+						})
+							
+						if($(event.target).data("chosenforkitty") !== "true")
 						{
-							var cardToAdd = $('<img dropped="false" src="Images/cards/rook.jpg" />');
-							cardToAdd.data('suit', 'rook').data('number', 10.5);
+							if (chosenCount < 5)
+							{
+								$(event.target).data("chosenforkitty", "true");
+								$(event.target).css("bottom", "+=30px");
+								
+								if (chosenCount === 4)
+								{
+									$("#submitkitty").button("enable");
+								}
+								else
+								{
+									$("#submitkitty").button("disable");
+								}	
+							}							 
+							else
+							{
+								createAlert("You can only place 5 cards in the kitty");
+								
+							}						
 						}
 						else
 						{
-							var cardToAdd = $('<img dropped="false" src="Images/cards/' + card.suit + card.number + '.jpg" />');
-							cardToAdd.data('suit', card.suit).data('number', card.number);
-						}
-						
-						$("#cardscontainer").append(cardToAdd);
-					}
-					
-					$("#cardscontainer img").draggable({
-				        revert: function (valid)
-				        {
-				            if (!valid)
-				            // if the card is dropped in a non-valid location
-				            {
-				                return true;
-				            }
-				            else
-				            {
-				                if ($(this).attr("dropped") === 'false')
-				                {                            
-				                    log("can't play that card");
-				                    return true;
-				                }
-				                return false;
-				            }
-				        }
-				    }).attr("dropped", "false").css("zIndex", 10);
-				    
-				    spaceCards();
+							$(event.target).data("chosenforkitty", "false");
+							$(event.target).css("bottom", "-=30px")
+							
+							$("#submitkitty").button("disable");
+						}						
+					});
 					
 					break;
 						
@@ -563,4 +588,62 @@ function spaceCards()
 	}
 }
 
+function initializeCards(message)
+{
+	$("#cardscontainer").html("");
+	
+	for(var p in message.data)
+	{
+		card = message.data[p]; 
+		
+		hand.push({
+			suit: card.suit,
+			number: card.number
+		});						
+	}
+	
+	hand.sort(sortMethod);
+	
+	for(i = 0; i < hand.length; i++)
+	{						
+		card = hand[i];
+		
+		if(card.suit == "rook")
+		{
+			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/rook.jpg" />');
+			cardToAdd.data('suit', 'rook').data('number', 10.5);
+		}
+		else
+		{
+			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/' + card.suit + card.number + '.jpg" />');
+			cardToAdd.data('suit', card.suit).data('number', card.number);
+		}
+		
+		$("#cardscontainer").append(cardToAdd);
+	}	
+    
+    spaceCards();
+}
 
+function makeCardsDraggable()
+{
+	$("#cardscontainer img").draggable({
+        revert: function (valid)
+        {
+            if (!valid)
+            // if the card is dropped in a non-valid location
+            {
+                return true;
+            }
+            else
+            {
+                if ($(this).attr("dropped") === 'false')
+                {                            
+                    log("can't play that card");
+                    return true;
+                }
+                return false;
+            }
+        }
+    }).attr("dropped", "false").css("zIndex", 10);
+}

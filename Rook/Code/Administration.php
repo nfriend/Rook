@@ -558,6 +558,8 @@ function beginGame($thisGame)
 	
 	$round = end($thisGame->Rounds);
 	
+	$round->CurrentHighestBidder = $thisGame->Team2->Player2;
+	
 	foreach($thisGame->Team1->Player1->Hand as $card)
 	{
 		array_push($p1Cards, array(
@@ -603,8 +605,30 @@ function beginGame($thisGame)
 	
 	$response = array(
 		"action"=> "command",
+		"message"=> "notyourbid",
+		"data"=> array(
+			"bid"=> $round->Bid,
+			"highestbidder"=> $round->CurrentHighestBidder->Name
+		)
+	);
+	
+	sendJson($thisGame->Team1->Player1->ClientId, $response);
+	
+	$response = array(
+		"action"=> "command",
 		"message"=> "initializecards",
 		"data"=>$p2Cards
+	);
+	
+	sendJson($thisGame->Team1->Player2->ClientId, $response);
+	
+	$response = array(
+		"action"=> "command",
+		"message"=> "notyourbid",
+		"data"=> array(
+			"bid"=> $round->Bid,
+			"highestbidder"=> $round->CurrentHighestBidder->Name
+		)
 	);
 	
 	sendJson($thisGame->Team1->Player2->ClientId, $response);
@@ -619,8 +643,30 @@ function beginGame($thisGame)
 	
 	$response = array(
 		"action"=> "command",
+		"message"=> "notyourbid",
+		"data"=> array(
+			"bid"=> $round->Bid,
+			"highestbidder"=> $round->CurrentHighestBidder->Name
+		)
+	);
+	
+	sendJson($thisGame->Team2->Player1->ClientId, $response);
+	
+	$response = array(
+		"action"=> "command",
 		"message"=> "initializecards",
 		"data"=>$p4Cards
+	);
+	
+	sendJson($thisGame->Team2->Player2->ClientId, $response);
+	
+	$response = array(
+		"action"=> "command",
+		"message"=> "notyourbid",
+		"data"=> array(
+			"bid"=> $round->Bid,
+			"highestbidder"=> $round->CurrentHighestBidder->Name
+		)
 	);
 	
 	sendJson($thisGame->Team2->Player2->ClientId, $response);
@@ -642,6 +688,16 @@ function beginGame($thisGame)
 	
 	sendJson($gamePlayers["p1"], $response);
 	
+	$response = array(
+		"action"=>"command",
+		"message"=>"yourbid",
+		"data"=> array(
+			"bid"=> $round->Bid,
+			"highestbidder"=> $round->CurrentHighestBidder->Name
+		)
+	);
+	
+	sendJson($gamePlayers["p1"], $response);	
 }
 
 function confirmClient($clientID)

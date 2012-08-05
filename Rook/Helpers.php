@@ -54,13 +54,41 @@ function getNextBidder($clientInfo)
 {
 	$game = $clientInfo["game"];	
 		
-	$nextPlayer;
+	$nextPlayer = getNextPlayer($clientInfo);
+	
+	$teamAndPlayer = null;
 	
 	for($i = 0; $i < 4; $i++)
 	{
-		$nextPlayer = getNextPlayer($clientInfo);
+		$nextPlayer = getNextPlayer($clientInfo, $teamAndPlayer);
 		if(!$nextPlayer->HasPassed)
-			break;		
+			break;
+		
+		if($nextPlayer === $game->Team1->Player1)
+		{
+			$teamNumber = 1;
+			$playerNumber = 1;
+		} 
+		else if($nextPlayer === $game->Team1->Player2) 
+		{
+			$teamNumber = 1;
+			$playerNumber = 2;
+		}
+		else if($nextPlayer === $game->Team2->Player1)
+		{
+			$teamNumber = 2;
+			$playerNumber = 1;
+		}
+		else if($nextPlayer === $game->Team2->Player2)
+		{
+			$teamNumber = 2;
+			$playerNumber = 2;
+		}		
+			
+		$teamAndPlayer = array(
+			"teamNumber"=> $teamNumber,
+			"playerNumber"=> $playerNumber
+		);		
 	}
 	
 	if($nextPlayer === $game->Team1->Player1)
@@ -75,12 +103,25 @@ function getNextBidder($clientInfo)
 	return $nextPlayer->ClientId;
 }
 
-function getNextPlayer($clientInfo)
-{	
-	$teamNumber = $clientInfo["teamNumber"];
-	$playerNumber = $clientInfo["playerNumber"];
-	$thisGame = $clientInfo["game"];
+// two options: pass in the clientInfo to get the next player after the referenced player OR
+//				pass in the team number and player number manually
+// method will still need $clientInfo if the second option is chosen, just to return the correct value
+// $teamAndPlayer is an array with keys "teamNumber" and "playerNumber"
+function getNextPlayer($clientInfo, $teamAndPlayer = null)
+{
+	if (!is_null($teamAndPlayer))
+	{
+		$teamNumber = $teamAndPlayer["teamNumber"];
+		$playerNumber = $teamAndPlayer["playerNumber"];		
+	}
+	else
+	{
+		$teamNumber = $clientInfo["teamNumber"];
+		$playerNumber = $clientInfo["playerNumber"];		
+	}
 	
+	$thisGame = $clientInfo["game"];
+		
 	if($teamNumber === 1)
 	{
 		if($playerNumber === 1)
@@ -429,6 +470,23 @@ function tellClientsWhatCardsTheyHave($game)
 	);
 
 	sendJson($id, $response);
+}
+
+function checkIfPointsInKitty($clientInfo)
+{
+	$game = $clientInfo["game"];
+	$round = end($game->Rounds);
+	$kitty = $round->Kitty;
+	
+	foreach($kitty as $card)
+	{
+		if($card->Value !== 0)
+		{
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 ?>

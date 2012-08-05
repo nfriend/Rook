@@ -300,5 +300,83 @@ function init() {
             return true;
         }
     });
+    
+    $('#passbutton').button().click(function()
+    {
+    	var response = {};
+			response.action = "game";
+			response.data = {
+				"command": "bid",
+				"arguments": "pass"
+			}; 
+			message = JSON.stringify(response);
+			send( message );
+    });
+    
+    $('#bidbutton').button().click(function()
+    {
+    	var response = {};
+			response.action = "game";
+			response.data = {
+				"command": "bid",
+				"arguments": $('#yourbid').val()
+			}; 
+			message = JSON.stringify(response);
+			send( message );
+    })
+    
+    $("#submitkitty").button({
+    	disabled: true
+    }).click( function() 
+    {
+    	chosenCards = [];
+    	
+    	chosenCardsForResponse = [];
+    	
+    	$(".card").each( function()
+    	{
+    		if ($(this).data("chosenforkitty") === "true")
+    			chosenCards.push($(this));
+    	})
+    	
+    	for(i = 0; i < chosenCards.length; i++)
+    	{
+    		chosenCardsForResponse.push({
+    			"suit": chosenCards[i].data("suit"),
+    			"number": chosenCards[i].data("number")
+    		})
+    	}
+    	
+    	$(".trumpoption").each( function() {
+    		thisOption = $(this);
+    		if (thisOption.data("chosentrump") === "true")
+    			trumpColor = thisOption.attr("trumpcolor");
+    	});
+    	
+    	var response = {};
+		response.action = "game";
+		response.data = {
+			"command": "kitty",
+			"arguments": chosenCardsForResponse,			
+			"trumpcolor": trumpColor					
+		}; 
+		message = JSON.stringify(response);
+		send( message );	
+    })
 	
+	$(".trumpoption").click( function(event)
+	{
+		$(".trumpoption").each( function()
+		{			
+			$(this).css("background-image", "").data("chosentrump", "false");
+		})
+		
+		$(event.target).css("background-image", "url('Images/checkmark.png')").data("chosentrump", "true");
+		//$(event.target).html("S");		
+	}).hover( function()
+	{
+		$(this).css("border-color", "white");
+	}, function() {
+		$(this).css("border-color", "black");
+	}).filter(":first").data("chosentrump", "true").css("background-image", "url('Images/checkmark.png')");
 }

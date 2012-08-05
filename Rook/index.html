@@ -79,6 +79,15 @@
 				log( 'You: ' + response.data);
 				send( message );
 			});
+			
+			$('#readybutton').click(function(e)
+			{
+				var response = {};
+				response.action = "confirm";
+				response.data = ""; 
+				message = JSON.stringify(response);
+				send( message );
+			});
 
 			$('#laybutton').click(function(e)
 			{
@@ -202,6 +211,7 @@
 			<option value="red">Red</option>
 			<option value="yellow">Yellow</option>
 		</select>
+		<button id="readybutton" value="ready">Ready</button><br />
 
 
 	</div>
