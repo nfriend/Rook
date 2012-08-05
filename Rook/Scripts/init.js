@@ -379,4 +379,10 @@ function init() {
 	}, function() {
 		$(this).css("border-color", "black");
 	}).filter(":first").data("chosentrump", "true").css("background-image", "url('Images/checkmark.png')");
+	
+		
+	for(i = 0; i < 10; i++)
+	{			
+		$("#topcardscontainer").append("<img src='Images/cards/black1.jpg' style='position: absolute; margin-left: -140px; left: " + (i + 1) * (700/10) + "px' />");
+	}
 }

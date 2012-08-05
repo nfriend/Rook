@@ -728,9 +728,21 @@ function checkForFullGame($gameId, $clientID, $sendGameFull = true)
 	{
 		$gamePlayers = array(
 			$thisGame->Team1->Player1->ClientId,
-			$thisGame->Team1->Player2->ClientId,
 			$thisGame->Team2->Player1->ClientId,
+			$thisGame->Team1->Player2->ClientId,
 			$thisGame->Team2->Player2->ClientId		
+		);
+		
+		// arranging the names so the client pairs them with the correct location on screen
+		$gameNames = array(
+			$thisGame->Team1->Player1->Name,
+			$thisGame->Team2->Player1->Name,
+			$thisGame->Team1->Player2->Name,
+			$thisGame->Team2->Player2->Name,
+			$thisGame->Team1->Player1->Name,
+			$thisGame->Team2->Player1->Name,
+			$thisGame->Team1->Player2->Name,
+			$thisGame->Team2->Player2->Name,
 		);
 			
 		if($thisGame->Team1->Player1->Confirmed === true && $thisGame->Team1->Player2->Confirmed === true && $thisGame->Team2->Player1->Confirmed === true && $thisGame->Team2->Player2->Confirmed === true)
@@ -740,14 +752,17 @@ function checkForFullGame($gameId, $clientID, $sendGameFull = true)
 				$thisGame->State->Location === "table";	
 			}		
 			
-			foreach($gamePlayers as $id)
+			//foreach($gamePlayers as $id)
+			//{
+			for($i = 0; $i < 4; $i++)
 			{
 				$response = array(
 					"action"=>"command", 
-					"message"=> "begingame"
+					"message"=> "begingame",
+					"data"=>array_slice($gameNames, $i, 4, false)
 				);	
 					
-				sendJson($id, $response);	
+				sendJson($gamePlayers[$i], $response);	
 			}
 			
 			foreach ( $Server->wsClients as $id => $client )

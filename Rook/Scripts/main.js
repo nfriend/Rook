@@ -308,6 +308,12 @@ function interpretServerMessage( payload )
 					$(".ui-dialog-content").dialog("close");
 					$("#lobby").css("display", "none");
 					$("#gametable").css("display", "");
+					
+					$("#bottomnamecontainer").html(message.data[0]);
+					$("#leftnamecontainer").html(message.data[1]);
+					$("#topnamecontainer").html(message.data[2]);
+					$("#rightnamecontainer").html(message.data[3]);
+					
 					break;
 					
 				case "initializecards":
@@ -339,6 +345,7 @@ function interpretServerMessage( payload )
 				
 				case "kitty":
 					$("#currentbidcontainer").css("display", "none");
+					$("#bidcontainer").css("display", "none");
 					$("#newsfeed").css("display", "").html("You won the bid! The kitty has been added to your hand.  Select five cards to place back into the kitty.");
 					$("#submitkitty").css("display", "");
 					$("#trumpselector").css("display", "");

@@ -328,6 +328,15 @@ class Game
 												"bidwinner"=> $round->PlayerBidWinner->Name
 											)											
 										);
+										
+										sendJson($id, $response);										
+										
+										$response = array(
+											"action"=>"command",
+											"message"=>"losepermission"
+										);									
+											
+										sendJson($id, $response);	
 									}
 									else 
 									{
@@ -346,9 +355,16 @@ class Game
 											"message"=>"kitty",
 											"data"=>$kittyCards											
 										);
+										
+										sendJson($id, $response);
+										
+										$response = array(
+											"action"=>"command",
+											"message"=>"gainpermission"
+										);
+										
+										sendJson($id, $response);
 									}
-									
-									sendJson($id, $response);
 								}
 							}
 							else
