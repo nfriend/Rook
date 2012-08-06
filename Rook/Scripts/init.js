@@ -278,10 +278,34 @@ function init() {
     $('#target').droppable({
         drop: function (event, ui)
         {
-            if ($(ui.draggable).attr("suit") === "hearts" || $(ui.draggable).attr("suit") === "clubs")
-            {
-                return;
+            var legalCard = false
+            
+            for(i = 0; i < allowedSuits.length; i++)
+            {   
+            	if ($(ui.draggable).data("suit") == allowedSuits[i])
+            	{
+            		legalCard = true;
+            		break;
+            	} 
+                	
             }
+            
+            if (!legalCard)
+            	return;	
+
+			var response = {};
+				response.action = "game"
+				response.data = {
+					"command": "lay",
+					"arguments": {
+						"suit": $(ui.draggable).data("suit"),
+						"number": $(ui.draggable).data("number")
+					}					
+				} 
+				message = JSON.stringify(response);
+				send( message );
+
+			allowedSuits = [];
 
             $(ui.draggable).attr("dropped", "true")
 			
@@ -295,9 +319,6 @@ function init() {
                 left: "13px",
                 top: "13px"
             }, 100);
-        }, accept: function (element)
-        {
-            return true;
         }
     });
     
@@ -384,5 +405,15 @@ function init() {
 	for(i = 0; i < 10; i++)
 	{			
 		$("#topcardscontainer").append("<img src='Images/cards/black1.jpg' style='position: absolute; margin-left: -140px; left: " + (i + 1) * (700/10) + "px' />");
+	}
+	
+	for(i = 0; i < 10; i++)
+	{			
+		$("#leftcardscontainer").append("<img src='Images/cards/rotated.jpg' style='position: absolute; margin-top: -140px; top: " + (i + 1) * (400/10) + "px' />");
+	}
+	
+	for(i = 0; i < 10; i++)
+	{			
+		$("#rightcardscontainer").append("<img src='Images/cards/rotated.jpg' style='position: absolute; margin-top: -140px; top: " + (i + 1) * (400/10) + "px' />");
 	}
 }

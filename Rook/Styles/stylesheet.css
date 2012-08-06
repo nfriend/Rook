@@ -4,6 +4,7 @@ body
 	font-size: 1.5em;
 	margin: 0px;
 	padding: 0px;
+	overflow: hidden;
 }
 
 input
@@ -108,7 +109,7 @@ input
 	width: 700px;
 	margin-left: -350px;
 	left: 50%;
-	bottom: 300px;
+	bottom: 240px;
 }
 
 #cardscontainer img
@@ -125,7 +126,7 @@ input
 	border-style: none;
 	left: 50%;
 	margin-left: -80px;
-	top: 100px;	
+	bottom: 340px;
 }
 
 #faketarget
@@ -137,7 +138,7 @@ input
 	border-radius: 5px;		
 	left: 50%;
 	margin-left: -80px;
-	top: 100px;
+	bottom: 340px;
 }
 
 #currentbidcontainer
@@ -145,7 +146,7 @@ input
 	position: absolute;
 	width: 100%;
 	text-align: center;
-	bottom: 400px;
+	bottom: 300px;
 }
 
 #yourbidcontainer
@@ -154,13 +155,13 @@ input
 	left: 50%;
 	margin-left: -240px;	
 	text-align: center;
-	bottom: 320px;
+	bottom: 230px;
 }
 
 #bidbutton
 {
 	position: absolute;
-	bottom: 342px;
+	bottom: 252px;
 	left: 50%;
 	margin-left: 100px;
 }
@@ -168,7 +169,7 @@ input
 #passbutton
 {
 	position: absolute;
-	bottom: 342px;
+	bottom: 252px;
 	left: 50%;
 	margin-left: 160px;
 }
@@ -176,9 +177,11 @@ input
 #newsfeed
 {
 	position: absolute;
-	width: 100%;
+	width: 700px;
 	text-align: center;
-	bottom: 346px;
+	bottom: 256px;
+	left: 50%;
+	margin-left: -350px;
 }
 
 #submitkitty
@@ -216,12 +219,28 @@ input
 	top: -120px;
 }
 
+#leftcardscontainer
+{
+	position: absolute;
+	margin-top: -200px;
+	top: 50%;
+	left: -130px;
+}
+
+#rightcardscontainer
+{
+	position: absolute;
+	margin-top: -200px;
+	top: 50%;
+	right: 60px;
+}
+
 #bottomnamecontainer
 {
 	position: absolute;
 	width: 100%;
 	text-align: center;
-	bottom: 25px;
+	bottom: 10px;	
 }
 
 #topnamecontainer
@@ -235,17 +254,74 @@ input
 #leftnamecontainer
 {
 	position: absolute;
-	text-align: left;
+	text-align: center;
 	top: 50%;
-	left: 10px;
 	margin-top: -20px;
 }
 
 #rightnamecontainer
 {
 	position: absolute;
-	text-align: right;
+	text-align: center;
 	top: 50%;
-	right: 10px;
+	right: 70px;
 	margin-top: -20px;
+}
+
+#leftpulsatinggreen
+{
+	z-index: -100; 
+	position: absolute; 
+	width: 35px; 
+	margin-top: -100px;
+	top: 50%;
+	left: 80px;
+	height: 200px;
+}
+
+#rightpulsatinggreen
+{
+	z-index: -100; 
+	position: absolute; 
+	width: 35px; 
+	margin-top: -100px;
+	top: 50%;
+	right: 80px;
+	height: 200px;
+}
+
+#toppulsatinggreen
+{
+	z-index: -100; 
+	position: absolute; 
+	width: 200px; 
+	margin-left: -100px;
+	left: 50%;
+	top: 85px;
+	height: 35px;
+}
+
+#bottompulsatinggreen
+{
+	z-index: -100; 
+	position: absolute; 
+	width: 200px; 
+	margin-left: -100px;
+	left: 50%;
+	bottom: 8px; 
+	height: 35px;
+}
+
+.rotatedclockwise
+{
+	-webkit-transform: rotate(90deg); 
+	-moz-transform: rotate(90deg);
+	-sand-transform: rotate(90deg);
+}
+
+.rotatedcounterclockwise
+{	
+	-webkit-transform: rotate(-90deg); 
+	-moz-transform: rotate(-90deg);
+	-sand-transform: rotate(-90deg);
 }

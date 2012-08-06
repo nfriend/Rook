@@ -525,27 +525,43 @@ function beginGame($thisGame)
 	array_push($thisGame->Rounds, new Round());
 				
 	$gamePlayers = array(
-		"p1"=>$thisGame->Team1->Player1->ClientId,
-		"p2"=>$thisGame->Team1->Player2->ClientId,
-		"p3"=>$thisGame->Team2->Player1->ClientId,
-		"p4"=>$thisGame->Team2->Player2->ClientId		
+		$thisGame->Team1->Player1->ClientId,
+		$thisGame->Team2->Player1->ClientId,
+		$thisGame->Team1->Player2->ClientId,
+		$thisGame->Team2->Player2->ClientId		
 	);
 	
-	foreach($gamePlayers as $id)
+	for($i = 0; $i < 4; $i++)
 	{
 		$response = array(
 			"action"=>"log", 
 			"message"=> "Beginning game " . (string)$thisGame->Id
 		);	
 			
-		sendJson($id, $response);
+		sendJson($gamePlayers[$i], $response);
 		
 		$response = array(
 			"action"=>"command", 
 			"message"=> "losepermission"
 		);	
 			
-		sendJson($id, $response);	
+		sendJson($gamePlayers[$i], $response);
+		
+		$response = array(
+			"action"=>"command", 
+			"message"=> "setplayernumber",
+			"data"=>(string)$i
+		);	
+			
+		sendJson($gamePlayers[$i], $response);
+		
+		$response = array(
+			"action"=>"command", 
+			"message"=> "waitingon",
+			"data"=>"0"
+		);
+		
+		sendJson($gamePlayers[$i], $response);		
 	}
 	
 	deal($thisGame);
@@ -686,7 +702,7 @@ function beginGame($thisGame)
 		"message"=>"gainpermission"
 	);
 	
-	sendJson($gamePlayers["p1"], $response);
+	sendJson($gamePlayers[0], $response);
 	
 	$response = array(
 		"action"=>"command",
@@ -697,7 +713,7 @@ function beginGame($thisGame)
 		)
 	);
 	
-	sendJson($gamePlayers["p1"], $response);	
+	sendJson($gamePlayers[0], $response);	
 }
 
 function confirmClient($clientID)

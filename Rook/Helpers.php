@@ -92,13 +92,38 @@ function getNextBidder($clientInfo)
 	}
 	
 	if($nextPlayer === $game->Team1->Player1)
+	{
+		$waitingOn = 0;		
 		$game->State->NextAction = "Team1Player1Bid";
+	}
 	if($nextPlayer === $game->Team1->Player2)
+	{
+		$waitingOn = 2;
 		$game->State->NextAction = "Team1Player2Bid";
+	}
 	if($nextPlayer === $game->Team2->Player1)
+	{
+		$waitingOn = 1;	
 		$game->State->NextAction = "Team2Player1Bid";
+	}
 	if($nextPlayer === $game->Team2->Player2)
+	{
+		$waitingOn = 3;
 		$game->State->NextAction = "Team2Player2Bid";
+	}
+	
+	$allClientIds = getAllClientIdsInGame($game);
+	
+	for($i = 0; $i < 4; $i++)
+	{	
+		$response = array(
+			"action"=>"command",
+			"message"=>"waitingon",
+			"data"=>$waitingOn											
+		);
+			
+		sendJson($allClientIds[$i], $response);
+	}
 	
 	return $nextPlayer->ClientId;
 }
@@ -291,16 +316,18 @@ function setNextGameState($clientInfo)
 	$clientTeam = $clientInfo["teamNumber"];
 	$clientPlayer = $clientInfo["playerNumber"];
 	$game = $clientInfo["game"];
-	
+		
 	if($clientTeam === 1)
 	{
 		if($clientPlayer === 1)
 		{
 			$game->State->NextAction = "Team2Player1Lay";
+			$waitingOn = 1;
 		}
 		else
 		{
 			$game->State->NextAction = "Team2Player2Lay";
+			$waitingOn = 3;
 		}
 	}
 	else
@@ -308,11 +335,26 @@ function setNextGameState($clientInfo)
 		if($clientPlayer === 1)
 		{
 			$game->State->NextAction = "Team1Player2Lay";
+			$waitingOn = 2;
 		}
 		else
 		{
 			$game->State->NextAction = "Team1Player1Lay";
+			$waitingOn = 0;
 		}
+	}
+	
+	$allClientIds = getAllClientIdsInGame($game);
+	
+	foreach($allClientIds as $id)
+	{
+		$response = array(
+			"action"=>"command",
+			"message"=>"waitingon",
+			"data"=>$waitingOn
+		);
+		
+		sendJson($id, $response);
 	}
 }
 
@@ -487,6 +529,82 @@ function checkIfPointsInKitty($clientInfo)
 	}
 	
 	return false;
+}
+
+function cardsToJsonArray($cardArray)
+{
+	$returnArray = array();	
+		
+	foreach($cardArray as $card)
+	{
+		array_push($returnArray, array(
+			"suit"=>$card->getSuitAsString(),
+			"number"=>$card->Number
+		));
+	}
+	
+	return $returnArray;
+}
+
+function getAbsolutePlayerNumber($clientInfo)
+{
+	if ($clientInfo["teamNumber"] === 1)
+	{
+		if($clientInfo["playerNumber"] === 1)
+		{
+			return 0;
+		}
+		else 
+		{
+			return 2;
+		}	
+	}
+	else
+	{
+		if($clientInfo["playerNumber"] === 1)
+		{
+			return 1;
+		}
+		else 
+		{
+			return 3;
+		}
+	}
+}
+
+function getAllowedSuits($clientInfo)
+{
+	$game = $clientInfo["game"];
+	$round = end($game->Rounds);
+	$trick = end($round->Tricks);
+	$allowedSuits = array();
+	
+	$leadSuit = $trick->CardSet[0]->Suit;
+	
+	if($leadSuit === Suit::Rook)
+		$leadSuit === $round->Trump;
+	
+	$handContainsSuit = false;
+	
+	foreach($clientInfo["player"]->Hand as $card)
+	{
+		if ($card->Suit === $leadSuit)
+		{
+			array_push($allowedSuits, $card->getSuitAsString());
+			$handContainsSuit = true;			
+			break;
+		}		 
+	}
+	
+	if ($handContainsSuit)
+	{
+		return $allowedSuits;
+	}
+	else
+	{
+		return array("black", "yellow", "red", "green", "rook");
+	}
+	
 }
 
 ?>

@@ -5,6 +5,8 @@ var playername = "Player";
 var allOpenGames = {};
 var currentGameId = -1;
 var hand = [];
+var myPlayerNumber = 0;
+var allowedSuits = [];
 
 $(init);
 
@@ -311,8 +313,17 @@ function interpretServerMessage( payload )
 					
 					$("#bottomnamecontainer").html(message.data[0]);
 					$("#leftnamecontainer").html(message.data[1]);
+					
+					$("#leftnamecontainer").css({
+						marginLeft: (($("#leftnamecontainer").width() * -1) / 2) + 100
+					});
+					
 					$("#topnamecontainer").html(message.data[2]);
 					$("#rightnamecontainer").html(message.data[3]);
+					
+					$("#rightnamecontainer").css({
+						marginRight: (($("#rightnamecontainer").width() * -1) / 2) + 30
+					});
 					
 					break;
 					
@@ -328,13 +339,13 @@ function interpretServerMessage( payload )
 					break;
 					
 				case "notyourbid":
-					$("#bidcontainer").css("display", "none");							
+					$("#bidcontainer").css("display", "none");
 					$("#currentbidcontainer").html(message.data.highestbidder + " currently has the bid at " + message.data.bid);
 					break;
 					
 				case "newsfeed":
 					$("#newsfeed").css("display", "").html(message.data);
-					$("#bidcontainer").css("display", "none");	
+					$("#bidcontainer").css("display", "none");
 					break;
 					
 				case "waitforkitty":
@@ -369,7 +380,7 @@ function interpretServerMessage( payload )
 							if (chosenCount < 5)
 							{
 								$(event.target).data("chosenforkitty", "true");
-								$(event.target).css("bottom", "+=30px");
+								$(event.target).css("bottom", "-=30px");
 								
 								if (chosenCount === 4)
 								{
@@ -389,14 +400,68 @@ function interpretServerMessage( payload )
 						else
 						{
 							$(event.target).data("chosenforkitty", "false");
-							$(event.target).css("bottom", "-=30px")
+							$(event.target).css("bottom", "+=30px")
 							
 							$("#submitkitty").button("disable");
 						}						
 					});
 					
 					break;
+					
+				case "setplayernumber":
+					myPlayerNumber = parseInt(message.data, 10);
+					break;
+					
+				case "waitingon":
+					moveFocus(parseInt(message.data, 10));
+					break;
+					
+				case "beginlay":
+					if (myPlayerNumber == message.playernumber)
+					{
+						$("#faketarget").css("display", "");
+						hand = [];
+						allowedSuits = ["black", "yellow", "green", "red", "rook"];
+						initializeCards(message)
+					}
+					
+					$("#trumpselector").add("#submitkitty").css("display", "none");
+					
+					$(".card").unbind('click');
+					makeCardsDraggable();
+					break;
+					
+				case "cardlaid":
+					ordinal = parseInt(message.data.player, 10) - myPlayerNumber;
+					
+					if (ordinal < 0)
+					{
+						ordinal = 4 + ordinal;	
+					}
+					
+					if (ordinal === 1)
+						animateP1CardPlay(message.data.suit, message.data.number, parseInt(message.data.numberofcardsintrick, 10));
+					if (ordinal === 2)
+						animateP2CardPlay(message.data.suit, message.data.number, parseInt(message.data.numberofcardsintrick, 10));
+					if (ordinal === 3)
+						animateP3CardPlay(message.data.suit, message.data.number, parseInt(message.data.numberofcardsintrick, 10));
+					
+					break;
+					
+				// also signals that it's this player's turn
+				case "setallowedsuits":
+					allowedSuits = [];
+					// not correctly grabbing the list of suits from the message
+					alert(printObject(message));
+					for(var p in message.data)
+					{
+						suit = message.data[p]; 
 						
+						allowedSuits.push(suit);						
+					}
+					
+					$("#faketarget").css('display', '').css("z-index", parseInt(message.numberofcardsintrick, 10) + 50);
+					break;
 			}
 			
 			break;
@@ -654,3 +719,130 @@ function makeCardsDraggable()
         }
     }).attr("dropped", "false").css("zIndex", 10);
 }
+
+function moveFocus(number)
+{
+	ordinal = number - myPlayerNumber;
+	
+	if (ordinal < 0)
+	{
+		ordinal = 4 + ordinal;	
+	}
+
+	if(ordinal === 0)
+	{
+		$("#bottompulsatinggreen").css("display", "");
+		$("#leftpulsatinggreen").css("display", "none");
+		$("#toppulsatinggreen").css("display", "none");
+		$("#rightpulsatinggreen").css("display", "none");
+		return
+	}
+	
+	if(ordinal === 1)
+	{
+		$("#bottompulsatinggreen").css("display", "none");
+		$("#leftpulsatinggreen").css("display", "");
+		$("#toppulsatinggreen").css("display", "none");
+		$("#rightpulsatinggreen").css("display", "none");
+		return
+	}
+	
+	if(ordinal === 2)
+	{
+		$("#bottompulsatinggreen").css("display", "none");
+		$("#leftpulsatinggreen").css("display", "none");
+		$("#toppulsatinggreen").css("display", "");
+		$("#rightpulsatinggreen").css("display", "none");
+		return
+	}
+	
+	if(ordinal === 3)
+	{
+		$("#bottompulsatinggreen").css("display", "none");
+		$("#leftpulsatinggreen").css("display", "none");
+		$("#toppulsatinggreen").css("display", "none");
+		$("#rightpulsatinggreen").css("display", "");
+		return
+	}
+} 
+
+function animateP1CardPlay(suit, number, zindex)
+{
+	newCard = $("<img class='played' src='Images/cards/" + suit + number + ".jpg' style='position: absolute; left: -200px; top: 50%; z-index:" + (zindex + 50) + "'/>");
+	$("#gametable").append(newCard);
+	
+	offset = $('#target').offset();
+	
+	$("#leftcardscontainer :last").remove();
+	
+	i = 0;
+	count = $("#leftcardscontainer").children().size();
+	
+	$("#leftcardscontainer").children().each( function() {
+		i++;
+		$(this).animate({
+			top: i * (400/count)
+		})		
+	})
+	
+	
+	$(newCard).animate({
+		left: offset.left - 80,
+		top: offset.top - 50
+	});
+	
+}
+
+function animateP2CardPlay(suit, number, zindex)
+{
+	newCard = $("<img class='played' src='Images/cards/" + suit + number + ".jpg' style='position: absolute; top: -200px; z-index:" + (zindex + 50) + "'/>");
+	$("#gametable").append(newCard);
+	
+	offset = $('#target').offset();
+	
+	$("#topcardscontainer :first").remove();
+	
+	i = 0;
+	count = $("#topcardscontainer").children().size();
+	
+	$("#topcardscontainer").children().each( function() {
+		i++;
+		$(this).animate({
+			left: i * (700/count)
+		})		
+	})
+	
+	$(newCard).animate({
+		left: offset.left + 10,
+		top: offset.top - 100
+	});
+}
+
+
+function animateP3CardPlay(suit, number, zindex)
+{
+	newCard = $("<img class='played' src='Images/cards/" + suit + number + ".jpg' style='position: absolute; right: -200px; top: 50%; z-index:" + (zindex + 50) + "'/>");
+	$("#gametable").append(newCard);
+	
+	offset = $('#target').offset();
+	
+	$("#rightcardscontainer :last").remove();
+	
+	i = 0;
+	count = $("#rightcardscontainer").children().size();
+	
+	$("#rightcardscontainer").children().each( function() {
+		i++;
+		$(this).animate({
+			top: i * (400/count)
+		})		
+	})
+	
+	
+	$(newCard).animate({
+		left: offset.left + 80,
+		top: offset.top - 50
+	});
+	
+}
+

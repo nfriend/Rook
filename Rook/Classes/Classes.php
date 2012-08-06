@@ -79,24 +79,28 @@ class Game
 									$round->TeamBidWinner = $this->Team1;
 									$round->PlayerBidWinner = $this->Team1->Player1;
 									$this->State->NextAction = "Team1Player1Kitty";
+									$waitingOn = 0;
 								}
 								if($this->Team1->Player2->HasPassed === false)
 								{
 									$round->TeamBidWinner = $this->Team1;
 									$round->PlayerBidWinner = $this->Team1->Player2;
 									$this->State->NextAction = "Team1Player2Kitty";
+									$waitingOn = 2;
 								}
 								if($this->Team2->Player1->HasPassed === false)
 								{
 									$round->TeamBidWinner = $this->Team2;
 									$round->PlayerBidWinner = $this->Team2->Player1;
 									$this->State->NextAction = "Team2Player1Kitty";
+									$waitingOn = 1;
 								}
 								if($this->Team2->Player2->HasPassed === false)
 								{
 									$round->TeamBidWinner = $this->Team2;
 									$round->PlayerBidWinner = $this->Team2->Player2;
 									$this->State->NextAction = "Team2Player2Kitty";
+									$waitingOn = 3;
 								}
 								
 									
@@ -151,6 +155,14 @@ class Game
 										
 										sendJson($id, $response);
 									}
+									
+									$response = array(
+											"action"=>"command",
+											"message"=>"waitingon",
+											"data"=>$waitingOn											
+										);
+										
+									sendJson($id, $response);
 								}
 								
 							}
@@ -294,24 +306,28 @@ class Game
 									$round->TeamBidWinner = $this->Team1;
 									$round->PlayerBidWinner = $this->Team1->Player1;
 									$this->State->NextAction = "Team1Player1Kitty";
+									$waitingOn = 0;
 								}
 								if($this->Team1->Player2->ClientId === $clientInfo["clientId"])
 								{
 									$round->TeamBidWinner = $this->Team1;
 									$round->PlayerBidWinner = $this->Team1->Player2;
 									$this->State->NextAction = "Team1Player2Kitty";
+									$waitingOn = 2;
 								}
 								if($this->Team2->Player1->ClientId === $clientInfo["clientId"])
 								{
 									$round->TeamBidWinner = $this->Team2;
 									$round->PlayerBidWinner = $this->Team2->Player1;
 									$this->State->NextAction = "Team2Player1Kitty";
+									$waitingOn = 1;
 								}
 								if($this->Team2->Player2->ClientId === $clientInfo["clientId"])
 								{
 									$round->TeamBidWinner = $this->Team2;
 									$round->PlayerBidWinner = $this->Team2->Player2;
 									$this->State->NextAction = "Team2Player2Kitty";
+									$waitingOn = 3;
 								}
 								
 								$allClients = getAllClientIdsInGame($clientInfo["game"]);
@@ -365,6 +381,14 @@ class Game
 										
 										sendJson($id, $response);
 									}
+									
+									$response = array(
+										"action"=>"command",
+										"message"=>"waitingon",
+										"data"=>$waitingOn											
+									);
+										
+									sendJson($id, $response);									
 								}
 							}
 							else
@@ -472,6 +496,8 @@ class Game
 								$messageString = "There are no points in the kitty.";
 							}
 							
+							$firstlayplayer = getAbsolutePlayerNumber($clientInfo);
+							
 							foreach($allClients as $id)
 							{											
 								$response = array(
@@ -480,9 +506,18 @@ class Game
 									"data"=> (string)$clientInfo["player"]->Name . " is finished with the kitty, and trump is " . $trumpColor . ". " . $messageString
 								);
 								
-								sendJson($id, $response);							
+								sendJson($id, $response);
+								
+								$response = array(
+									"action"=>"command",
+									"message"=>"beginlay",
+									"playernumber"=> (string)$firstlayplayer,
+									"data"=>cardsToJsonArray($clientInfo["player"]->Hand)							
+								);						
+								
+								sendJson($id, $response);	
 							}
-							
+														
 							$teamNumber = $clientInfo["teamNumber"];
 							$playerNumber = $clientInfo["playerNumber"];
 							
@@ -531,12 +566,24 @@ class Game
 								
 								removeCardFromHand($clientInfo["clientId"], $clientInfo["player"], $card);
 								
-								$response = array(
-									"action"=>"log",
-									"message"=>"Card laid."
-								);
+								$allClients = getAllClientIdsInGame($clientInfo["game"]);
+								$thisPlayerNumber = getAbsolutePlayerNumber($clientInfo);
 								
-								sendJson($clientInfo["clientId"], $response);
+								foreach($allClients as $id)
+								{
+									$response = array(
+										"action"=>"command",
+										"message"=>"cardlaid",
+										"data"=> array(
+											"player"=>$thisPlayerNumber,
+											"suit"=>$card->getSuitAsString(),
+											"number"=>$card->Number,
+											"numberofcardsintrick"=>count($trick->CardSet)
+										)
+									);
+								
+									sendJson($id, $response);	
+								}
 								
 								if(count($trick->CardSet) === 4)
 								// if the trick is done, figure out who won
@@ -664,6 +711,9 @@ class Game
 									setNextGameState($clientInfo);
 									$allClients = getAllClientIdsInGame($clientInfo["game"]);
 									
+									//not working, as this refers to the current player's hand, and we need to be referencing the next player's hand
+									$allowedSuits = getAllowedSuits($clientInfo);
+									
 									foreach($allClients as $id)
 									{
 										if($id === getNextClientId($clientInfo))
@@ -673,6 +723,14 @@ class Game
 												"message"=>"gainpermission"
 											);
 											sendJson($id, $response);	
+											
+											$response = array(
+												"action"=>"command",
+												"message"=>"setallowedsuits",
+												"data"=>$allowedSuits,
+												"numberofcardsintrick"=>count($trick->CardSet)
+											);
+											sendJson($id, $response);
 										}		
 										else
 										{
