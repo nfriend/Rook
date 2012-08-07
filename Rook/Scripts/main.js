@@ -7,6 +7,7 @@ var currentGameId = -1;
 var hand = [];
 var myPlayerNumber = 0;
 var allowedSuits = [];
+var numberOfCardsInTrick = 0;
 
 $(init);
 
@@ -451,8 +452,6 @@ function interpretServerMessage( payload )
 				// also signals that it's this player's turn
 				case "setallowedsuits":
 					allowedSuits = [];
-					// not correctly grabbing the list of suits from the message
-					alert(printObject(message));
 					for(var p in message.data)
 					{
 						suit = message.data[p]; 
@@ -460,7 +459,33 @@ function interpretServerMessage( payload )
 						allowedSuits.push(suit);						
 					}
 					
-					$("#faketarget").css('display', '').css("z-index", parseInt(message.numberofcardsintrick, 10) + 50);
+					numberOfCardsInTrick = message.numberofcardsintrick
+					
+					setTimeout(function() 
+					{
+						$("#faketarget").css('display', '').css("z-index", parseInt(message.numberofcardsintrick, 10)*2 + 51);
+					}, 800);
+					break;
+				case "trickdone":
+					numberOfCardsInTrick = 0;
+					moveFocus(parseInt(message.data, 10));
+					
+					ordinal = parseInt(message.data, 10) - myPlayerNumber;
+					
+					if (ordinal < 0)
+					{
+						ordinal = 4 + ordinal;	
+					}
+					
+					if (ordinal === 0)
+						setTimeout(animateP0TrickWin, 2000)
+					if (ordinal === 1)
+						setTimeout(animateP1TrickWin, 2000)
+					if (ordinal === 2)
+						setTimeout(animateP2TrickWin, 2000)
+					if (ordinal === 3)
+						setTimeout(animateP3TrickWin, 2000)
+					
 					break;
 			}
 			
@@ -705,18 +730,24 @@ function makeCardsDraggable()
             if (!valid)
             // if the card is dropped in a non-valid location
             {
-                return true;
+                $(this).attr("z-index", "10");
+                return true;                
             }
             else
             {
                 if ($(this).attr("dropped") === 'false')
                 {                            
-                    log("can't play that card");
+                    $(this).attr("z-index", "10");
+                    createAlert("You must follow suit");
                     return true;
                 }
                 return false;
             }
-        }
+        },
+        start: function(event, ui)
+        {
+        	$(this).css("z-index", (numberOfCardsInTrick + 1)*2 + 50)
+        }        
     }).attr("dropped", "false").css("zIndex", 10);
 }
 
@@ -768,7 +799,16 @@ function moveFocus(number)
 
 function animateP1CardPlay(suit, number, zindex)
 {
-	newCard = $("<img class='played' src='Images/cards/" + suit + number + ".jpg' style='position: absolute; left: -200px; top: 50%; z-index:" + (zindex + 50) + "'/>");
+	if (suit !== "rook")
+	{
+		cardPath = suit + number;
+	}
+	else
+	{
+		cardPath = "rook";
+	}
+	
+	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".jpg' style='position: absolute; left: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
 	$("#gametable").append(newCard);
 	
 	offset = $('#target').offset();
@@ -795,7 +835,16 @@ function animateP1CardPlay(suit, number, zindex)
 
 function animateP2CardPlay(suit, number, zindex)
 {
-	newCard = $("<img class='played' src='Images/cards/" + suit + number + ".jpg' style='position: absolute; top: -200px; z-index:" + (zindex + 50) + "'/>");
+	if (suit !== "rook")
+	{
+		cardPath = suit + number;
+	}
+	else
+	{
+		cardPath = "rook";
+	}
+	
+	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".jpg' style='position: absolute; top: -200px; z-index:" + ((zindex*2) + 50) + "'/>");
 	$("#gametable").append(newCard);
 	
 	offset = $('#target').offset();
@@ -821,7 +870,16 @@ function animateP2CardPlay(suit, number, zindex)
 
 function animateP3CardPlay(suit, number, zindex)
 {
-	newCard = $("<img class='played' src='Images/cards/" + suit + number + ".jpg' style='position: absolute; right: -200px; top: 50%; z-index:" + (zindex + 50) + "'/>");
+	if (suit !== "rook")
+	{
+		cardPath = suit + number;
+	}
+	else
+	{
+		cardPath = "rook";
+	}
+	
+	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".jpg' style='position: absolute; right: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
 	$("#gametable").append(newCard);
 	
 	offset = $('#target').offset();
@@ -846,3 +904,80 @@ function animateP3CardPlay(suit, number, zindex)
 	
 }
 
+function animateP0TrickWin()
+{
+	$(".played").each( function()
+	{
+		height = $(window).height();
+		offset = $('#target').offset();
+		
+		$(this).animate({
+			top: height + "px",
+			left: offset.left
+		}, 1000, function ()
+		{
+			$(".played").each( function()
+			{
+				$(this).remove();
+			})
+		});
+	});
+}
+
+function animateP1TrickWin()
+{
+	$(".played").each( function()
+	{
+		offset = $('#target').offset();
+		
+		$(this).animate({
+			top: offset.top,
+			left: "-140px"
+		}, 1000, function ()
+		{
+			$(".played").each( function()
+			{
+				$(this).remove();
+			})
+		});
+	});
+}
+
+function animateP2TrickWin()
+{
+	$(".played").each( function()
+	{
+		offset = $('#target').offset();
+		
+		$(this).animate({
+			top: "-180px",
+			left: offset.left
+		}, 1000, function ()
+		{
+			$(".played").each( function()
+			{
+				$(this).remove();
+			})
+		});
+	});
+}
+
+function animateP3TrickWin()
+{
+	$(".played").each( function()
+	{
+		width = $(window).width();
+		offset = $('#target').offset();
+		
+		$(this).animate({
+			top: offset.top,
+			left: width + "px"
+		}, 1000, function ()
+		{
+			$(".played").each( function()
+			{
+				$(this).remove();
+			})
+		});
+	});
+}

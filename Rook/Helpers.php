@@ -250,13 +250,20 @@ function isLegalMove($clientInfo, $trick, $card)
 		return true;	
 		
 	$game = $clientInfo["game"];
-	$round = end($game->Rounds);		
+	$round = end($game->Rounds);	
+	$trumpWasLed = false;	
 		
 	$suitLead = $trick->CardSet[0]->Suit;
 	if ($suitLead === Suit::Rook)
+	{
 		$suitLead = $round->Trump;
+		$trumpWasLed = true;
+	}
 		
 	if($suitLead === $card->Suit)
+		return true;
+	
+	if($trumpWasLed && $card->Suit === Suit::Rook)
 		return true;	
 		
 	$game = $clientInfo["game"];
@@ -287,7 +294,7 @@ function isLegalMove($clientInfo, $trick, $card)
 	
 	foreach($player->Hand as $card)
 	{
-		if($suitLead === $card->Suit)
+		if($suitLead === $card->Suit || ($trumpWasLed && $card->Suit === Suit::Rook))
 			return false;
 	}
 	
@@ -572,9 +579,66 @@ function getAbsolutePlayerNumber($clientInfo)
 	}
 }
 
-function getAllowedSuits($clientInfo)
+// this method will either figure out the next hand based on the player referenced in $clientInfo,
+// or it will use the teamNumber and playerNumber if provided - in this case it will NOT
+// progress to the next player, but use the hand of the player provided
+function getAllowedSuitsForNextPlayer($clientInfo, $teamNumber = null, $playerNumber = null)
 {
-	$game = $clientInfo["game"];
+	$game = $clientInfo["game"];			
+	$hand;
+	
+	if(is_null($teamNumber) || is_null($playerNumber))
+	{
+		if($clientInfo["teamNumber"] === 1)
+		{
+			if($clientInfo["playerNumber"] === 1)
+			{
+				$hand = $game->Team2->Player1->Hand;	
+			}
+			else
+			{
+				$hand = $game->Team2->Player2->Hand;
+			}
+		}
+		else
+		{
+			if($clientInfo["playerNumber"] === 1)
+			{
+				$hand = $game->Team1->Player2->Hand;	
+			}
+			else
+			{
+				$hand = $game->Team1->Player1->Hand;
+			}
+		}
+	}
+	else
+	{
+		if($teamNumber === 1)
+		{
+			if($playerNumber === 1)
+			{
+				$hand = $game->Team1->Player1->Hand;	
+			}
+			else
+			{
+				$hand = $game->Team1->Player2->Hand;
+			}
+		}
+		else
+		{
+			if($playerNumber === 1)
+			{
+				$hand = $game->Team2->Player1->Hand;	
+			}
+			else
+			{
+				$hand = $game->Team2->Player2->Hand;
+			}
+		}	
+	}	
+		
+	$trumpWasLed = false;
 	$round = end($game->Rounds);
 	$trick = end($round->Tricks);
 	$allowedSuits = array();
@@ -584,21 +648,43 @@ function getAllowedSuits($clientInfo)
 	if($leadSuit === Suit::Rook)
 		$leadSuit === $round->Trump;
 	
+	if($leadSuit === $round->Trump)
+		$trumpWasLed = true;
+	
 	$handContainsSuit = false;
 	
-	foreach($clientInfo["player"]->Hand as $card)
+	foreach($hand as $card)
 	{
-		if ($card->Suit === $leadSuit)
+		if($trumpWasLed)
 		{
-			array_push($allowedSuits, $card->getSuitAsString());
-			$handContainsSuit = true;			
-			break;
+			if ($card->Suit === $leadSuit || $card->Suit === Suit::Rook)
+			{
+				array_push($allowedSuits, $card->getSuitAsString());
+				$handContainsSuit = true;			
+				break;
+			}
+		}
+		else
+		{
+			if ($card->Suit === $leadSuit)
+			{
+				array_push($allowedSuits, $card->getSuitAsString());
+				$handContainsSuit = true;			
+				break;
+			}
 		}		 
 	}
 	
 	if ($handContainsSuit)
 	{
-		return $allowedSuits;
+		if($trumpWasLed)
+		{
+			return array("rook", getSuitAsString($round->Trump));	
+		}	
+		else
+		{
+			return $allowedSuits;	
+		}		
 	}
 	else
 	{

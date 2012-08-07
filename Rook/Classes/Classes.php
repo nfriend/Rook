@@ -643,15 +643,28 @@ class Game
 									
 									$key = array_search($highestCard, $trick->CardSet);
 									$winnerInfo = $trick->PlayerOrder[$key];
+									$waitingOn;
 									
 									if($winnerInfo["teamNumber"] === 1 && $winnerInfo["playerNumber"] === 1)
+									{
 										$this->State->NextAction = "Team1Player1Lay";
+										$waitingOn = 0;
+									}
 									if($winnerInfo["teamNumber"] === 1 && $winnerInfo["playerNumber"] === 2)
+									{
 										$this->State->NextAction = "Team1Player2Lay";
+										$waitingOn = 2;
+									}
 									if($winnerInfo["teamNumber"] === 2 && $winnerInfo["playerNumber"] === 1)
+									{	
 										$this->State->NextAction = "Team2Player1Lay";
+										$waitingOn = 1;
+									}
 									if($winnerInfo["teamNumber"] === 2 && $winnerInfo["playerNumber"] === 2)
+									{	
 										$this->State->NextAction = "Team2Player2Lay";
+										$waitingOn = 3;
+									}
 									
 									$isLastRound = false;
 									if(count($round->Tricks) === 10)
@@ -673,6 +686,14 @@ class Game
 												"action"=>"command",
 												"message"=>"gainpermission"
 											);
+											sendJson($id, $response);
+											
+											$response = array(
+												"action"=>"command",
+												"message"=>"setallowedsuits",
+												"numberofcardsintrick"=>"0",
+												"data"=> array("black", "yellow", "red", "green", "rook")
+											);
 											sendJson($id, $response);	
 										}		
 										else
@@ -685,8 +706,17 @@ class Game
 										}		
 											
 										$response = array(
-											"action"=>"log",
-											"message"=>"The trick was won by Player " . $winnerInfo["clientId"] . " with the " . $highestCard->toString()
+											"action"=>"command",
+											"message"=>"newsfeed",
+											"data"=>"The trick was won by " . $winnerInfo["player"]->Name . " with the " . $highestCard->toString()
+										);
+										
+										sendJson($id, $response);
+										
+										$response = array(
+											"action"=>"command",
+											"message"=>"trickdone",
+											"data"=>$waitingOn
 										);
 										
 										sendJson($id, $response);
@@ -694,7 +724,7 @@ class Game
 										if($isLastRound)
 										{
 											$response = array(
-											"action"=>"log",
+											"action"=>"alert",
 											"message"=>"The game is over!  The kitty goes to team " . (string)$winnerInfo["teamNumber"]
 										);
 										
@@ -711,8 +741,7 @@ class Game
 									setNextGameState($clientInfo);
 									$allClients = getAllClientIdsInGame($clientInfo["game"]);
 									
-									//not working, as this refers to the current player's hand, and we need to be referencing the next player's hand
-									$allowedSuits = getAllowedSuits($clientInfo);
+									$allowedSuits = getAllowedSuitsForNextPlayer($clientInfo);
 									
 									foreach($allClients as $id)
 									{

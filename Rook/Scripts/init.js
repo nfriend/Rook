@@ -291,7 +291,9 @@ function init() {
             }
             
             if (!legalCard)
-            	return;	
+            	return;
+            	
+        	$(ui.draggable).addClass("played");	
 
 			var response = {};
 				response.action = "game"
@@ -308,16 +310,21 @@ function init() {
 			allowedSuits = [];
 
             $(ui.draggable).attr("dropped", "true")
+            
+            $("#faketarget").css("display", "none");
 			
-			$(ui.draggable).appendTo("#target");
+			//$(ui.draggable).appendTo("#target");
+			
+			$(ui.draggable).appendTo("#gametable");
 
+			offset = $("#target").offset();
+			
             spaceCards();
             
             $(ui.draggable).css({
                 position: "absolute",
-                marginLeft: "0px",
-                left: "13px",
-                top: "13px"
+                left: offset.left + 13 + "px",
+                top: offset.top + 7 + "px"
             }, 100);
         }
     });
