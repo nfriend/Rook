@@ -707,12 +707,22 @@ function initializeCards(message)
 		
 		if(card.suit == "rook")
 		{
-			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/rook.jpg" />');
+			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/Rook.PNG" />');
 			cardToAdd.data('suit', 'rook').data('number', 10.5);
 		}
 		else
 		{
-			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/' + card.suit + card.number + '.jpg" />');
+			if (card.suit === "green")
+			{
+				extension = ".PNG";
+			}
+			else
+			{
+				extension = ".jpg";
+			}
+	
+			
+			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/' + card.suit + card.number + extension + '" />');
 			cardToAdd.data('suit', card.suit).data('number', card.number);
 		}
 		
@@ -805,10 +815,19 @@ function animateP1CardPlay(suit, number, zindex)
 	}
 	else
 	{
-		cardPath = "rook";
+		cardPath = "Rook";
 	}
 	
-	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".jpg' style='position: absolute; left: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
+	if (suit === "green")
+	{
+		extension = ".PNG";
+	}
+	else
+	{
+		extension = ".jpg";
+	}
+	
+	newCard = $("<img class='played' src='Images/cards/" + cardPath + extension + "' style='position: absolute; left: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
 	$("#gametable").append(newCard);
 	
 	offset = $('#target').offset();
@@ -844,7 +863,16 @@ function animateP2CardPlay(suit, number, zindex)
 		cardPath = "rook";
 	}
 	
-	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".jpg' style='position: absolute; top: -200px; z-index:" + ((zindex*2) + 50) + "'/>");
+	if (suit === "green")
+	{
+		extension = ".PNG";
+	}
+	else
+	{
+		extension = ".jpg";
+	}
+		
+	newCard = $("<img class='played' src='Images/cards/" + cardPath + extension + "' style='position: absolute; top: -200px; z-index:" + ((zindex*2) + 50) + "'/>");
 	$("#gametable").append(newCard);
 	
 	offset = $('#target').offset();
@@ -879,7 +907,17 @@ function animateP3CardPlay(suit, number, zindex)
 		cardPath = "rook";
 	}
 	
-	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".jpg' style='position: absolute; right: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
+	if (suit === "green")
+	{
+		extension = ".PNG";
+	}
+	else
+	{
+		extension = ".jpg";
+	}
+	
+	
+	newCard = $("<img class='played' src='Images/cards/" + cardPath + extension + "' style='position: absolute; right: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
 	$("#gametable").append(newCard);
 	
 	offset = $('#target').offset();
