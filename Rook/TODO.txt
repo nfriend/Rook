@@ -1,3 +1,3 @@
 BUG: processCommand() crashes if someone tries to bid before a game has begun - and probably not just bidding, but anything game related.
 BUG: test to make sure that people can't lay on the very first round out of turn
-BUG: client side rook playing/suit following... test all possible cases.
+BUG: when there's already a game going, another set of people can't get past the confirmation page... javascript errors saying "thisGame is undefined"

@@ -65,7 +65,8 @@
  			</div>
  		</div>
  		<div id="gametable" style="display: none;">
- 			<div id="faketarget" style="text-align: center; display: none"><p>It's your turn.</p></div>
+ 			<div id="backgroundimage" style="background-image: url('Images/background.jpg'); width: 100%; height: 100%; position: absolute; z-index: -100;"></div>
+ 			<div id="faketarget" style="text-align: center; border-style: none;"><p style="display: none;">It's your turn.</p></div>
  			<div id="target"></div>
  			<div id="currentbidcontainer"></div>
  			<div id="bidcontainer" style="display:none">	 			
@@ -79,21 +80,21 @@
  				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trump color:
  				<div id="trumpoptions">
  					<div class="trumpoption" style="background-color: black" trumpcolor="black"></div>
- 					<div class="trumpoption" style="background-color: red" trumpcolor="red"></div>
- 					<div class="trumpoption" style="background-color: yellow" trumpcolor="yellow"></div>
- 					<div class="trumpoption" style="background-color: green" trumpcolor="green"></div>
+ 					<div class="trumpoption" style="background-color: #F3B200" trumpcolor="yellow"></div>
+ 					<div class="trumpoption" style="background-color: #E31212" trumpcolor="red"></div>
+ 					<div class="trumpoption" style="background-color: #03A884" trumpcolor="green"></div>
 				</div>
  			</div>
  			
- 			<div id="bottomnamecontainer"></div>
- 			<div id="topnamecontainer"></div>
- 			<div id="leftnamecontainer" class="rotatedclockwise"></div>
- 			<div id="rightnamecontainer" class="rotatedcounterclockwise"></div>
+ 			<div id="bottomnamecontainer" class="namecontainer"></div>
+ 			<div id="topnamecontainer" class="namecontainer"></div>
+ 			<div id="leftnamecontainer" class="rotatedclockwise namecontainer"></div>
+ 			<div id="rightnamecontainer" class="rotatedcounterclockwise namecontainer"></div>
  			
- 			<img id="bottompulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none;"/>
- 			<img id="toppulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none;"/>
- 			<img id="leftpulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none;"/>
- 			<img id="rightpulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none;"/>
+ 			<img id="bottompulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none; border-style: solid; border-width: 3px;"/>
+ 			<img id="toppulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none; border-style: solid; border-width: 3px;"/>
+ 			<img id="leftpulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none; border-style: solid; border-width: 3px;"/>
+ 			<img id="rightpulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none; border-style: solid; border-width: 3px;"/>
  			
  			<div id="leftcardscontainer"></div>
  			<div id="topcardscontainer"></div>

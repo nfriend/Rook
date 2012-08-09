@@ -246,41 +246,45 @@ function interpretServerMessage( payload )
 					
 					if(message.data.team1player1)
 					{
-						thisDiv.append("<li>" + message.data.team1player1 + "</li>");
+						thisDiv.append("<li> Team 1: " + message.data.team1player1 + "</li>");
 						thisGame.team1player1 = message.data.team1player1;						
 					} 
 					else
 					{
+						thisDiv.append("<li> Team 1:</li>");
 						thisGame.team1player1 = null;
 					}
 					
 					if(message.data.team1player2)
 					{
-						thisDiv.append("<li>" + message.data.team1player2 + "</li>");
+						thisDiv.append("<li> Team 1: " + message.data.team1player2 + "</li>");
 						thisGame.team1player2 = message.data.team1player2;						
 					}
 					else
 					{
+						thisDiv.append("<li> Team 1:</li>");
 						thisGame.team1player2 = null;	
 					}
 					
 					if(message.data.team2player1)
 					{
-						thisDiv.append("<li>" + message.data.team2player1 + "</li>");
+						thisDiv.append("<li> Team 2: " + message.data.team2player1 + "</li>");
 						thisGame.team2player1 = message.data.team2player1;						
 					}
 					else
 					{
+						thisDiv.append("<li> Team 2:</li>");
 						thisGame.team2player1 = null;	
 					}
 					
 					if(message.data.team2player2)
 					{
-						thisDiv.append("<li>" + message.data.team2player2 + "</li>");
+						thisDiv.append("<li> Team 2: " + message.data.team2player2 + "</li>");
 						thisGame.team2player2 = message.data.team2player2;						
 					}
 					else
 					{
+						thisDiv.append("<li> Team 2:</li>");
 						thisGame.team2player2 = null;	
 					}
 					
@@ -313,19 +317,29 @@ function interpretServerMessage( payload )
 					$("#gametable").css("display", "");
 					
 					$("#bottomnamecontainer").html(message.data[0]);
+					
+					$("#bottomnamecontainer").css({
+						marginLeft: (-1 * $("#bottomnamecontainer").width() / 2)
+					});
+					
 					$("#leftnamecontainer").html(message.data[1]);
 					
 					$("#leftnamecontainer").css({
-						marginLeft: (($("#leftnamecontainer").width() * -1) / 2) + 100
+						marginLeft: (($("#leftnamecontainer").width() * -1) / 2) + 85
 					});
 					
 					$("#topnamecontainer").html(message.data[2]);
+					
+					$("#topnamecontainer").css({
+						marginLeft: (-1 * $("#topnamecontainer").width() /2)
+					});
+					
+					
 					$("#rightnamecontainer").html(message.data[3]);
 					
 					$("#rightnamecontainer").css({
-						marginRight: (($("#rightnamecontainer").width() * -1) / 2) + 30
+						marginRight: (($("#rightnamecontainer").width() * -1) / 2) + 15
 					});
-					
 					break;
 					
 				case "initializecards":
@@ -420,7 +434,8 @@ function interpretServerMessage( payload )
 				case "beginlay":
 					if (myPlayerNumber == message.playernumber)
 					{
-						$("#faketarget").css("display", "");
+						$("#faketarget").css("border-style", "solid").css("background-color", "white").css("z-index", (parseInt(message.numberofcardsintrick, 10)*2 + 51)).children("p").css("display", "");
+						
 						hand = [];
 						allowedSuits = ["black", "yellow", "green", "red", "rook"];
 						initializeCards(message)
@@ -463,8 +478,8 @@ function interpretServerMessage( payload )
 					
 					setTimeout(function() 
 					{
-						$("#faketarget").css('display', '').css("z-index", parseInt(message.numberofcardsintrick, 10)*2 + 51);
-					}, 800);
+						$("#faketarget").css("border-style", "solid").css("background-color", "white").css("z-index", (parseInt(message.numberofcardsintrick, 10)*2 + 51)).children("p").css("display", "");
+					}, 1500);
 					break;
 				case "trickdone":
 					numberOfCardsInTrick = 0;
@@ -526,22 +541,38 @@ function addGame(g, details)
 	
 	if(game.team1player1)
 	{
-		$(newHtml).children(".playerlist").append("<li>" + game.team1player1 + "</li>");
+		$(newHtml).children(".playerlist").append("<li> Team 1: " + game.team1player1 + "</li>");
+	}
+	else
+	{
+		$(newHtml).children(".playerlist").append("<li> Team 1: </li>");
 	}
 	
 	if(game.team1player2)
 	{
-		$(newHtml).children(".playerlist").append("<li>" + game.team1player2 + "</li>");
+		$(newHtml).children(".playerlist").append("<li> Team 1: " + game.team1player2 + "</li>");
+	}
+	else
+	{
+		$(newHtml).children(".playerlist").append("<li> Team 1: </li>");
 	}
 	
 	if(game.team2player1)
 	{
-		$(newHtml).children(".playerlist").append("<li>" + game.team2player1 + "</li>");
+		$(newHtml).children(".playerlist").append("<li> Team 2: " + game.team2player1 + "</li>");
+	}
+	else
+	{
+		$(newHtml).children(".playerlist").append("<li> Team 2: </li>");
 	}
 	
 	if(game.team2player2)
 	{
-		$(newHtml).children(".playerlist").append("<li>" + game.team2player2 + "</li>");
+		$(newHtml).children(".playerlist").append("<li> Team 2: " + game.team2player2 + "</li>");
+	}
+	else
+	{
+		$(newHtml).children(".playerlist").append("<li> Team 2: </li>");
 	}
 	
 	if(game.rookvalue === "10.5")
@@ -606,22 +637,38 @@ function changeInGameDetails(thisGame)
 	
 	if(thisGame.team1player1)
 	{
-		thisDiv.append("<li>" + thisGame.team1player1 + "</li>");						
+		thisDiv.append("<li> Team 1: " + thisGame.team1player1 + "</li>");						
+	}
+	else
+	{
+		thisDiv.append("<li> Team 1: </li>");
 	}
 	
 	if(thisGame.team1player2)
 	{
-		thisDiv.append("<li>" + thisGame.team1player2 + "</li>");						
+		thisDiv.append("<li> Team 1: " + thisGame.team1player2 + "</li>");						
+	}
+	else
+	{
+		thisDiv.append("<li> Team 1: </li>");
 	}
 	
 	if(thisGame.team2player1)
 	{
-		thisDiv.append("<li>" + thisGame.team2player1 + "</li>");						
+		thisDiv.append("<li> Team 2: " + thisGame.team2player1 + "</li>");						
+	}
+	else
+	{
+		thisDiv.append("<li> Team 2: </li>");
 	}
 	
 	if(thisGame.team2player2)
 	{
-		thisDiv.append("<li>" + thisGame.team2player2 + "</li>");						
+		thisDiv.append("<li> Team 2: " + thisGame.team2player2 + "</li>");						
+	}
+	else
+	{
+		thisDiv.append("<li> Team 2: </li>");
 	}
 	
 	ruleUl = $("#gamedetails .rulelist");
@@ -707,29 +754,22 @@ function initializeCards(message)
 		
 		if(card.suit == "rook")
 		{
-			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/Rook.PNG" />');
+			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/rook.PNG" />');
 			cardToAdd.data('suit', 'rook').data('number', 10.5);
 		}
 		else
-		{
-			if (card.suit === "green")
-			{
-				extension = ".PNG";
-			}
-			else
-			{
-				extension = ".jpg";
-			}
-	
-			
-			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/' + card.suit + card.number + extension + '" />');
+		{		
+			var cardToAdd = $('<img class="card" dropped="false" src="Images/cards/' + card.suit + card.number + '.PNG" />');
 			cardToAdd.data('suit', card.suit).data('number', card.number);
 		}
 		
 		$("#cardscontainer").append(cardToAdd);
 	}	
     
-    spaceCards();
+    cardToAdd.load(function()
+    {
+    	spaceCards();
+    })
 }
 
 function makeCardsDraggable()
@@ -740,15 +780,18 @@ function makeCardsDraggable()
             if (!valid)
             // if the card is dropped in a non-valid location
             {
-                $(this).attr("z-index", "10");
+                $(this).css("z-index", "10");
                 return true;                
             }
             else
             {
                 if ($(this).attr("dropped") === 'false')
                 {                            
-                    $(this).attr("z-index", "10");
-                    createAlert("You must follow suit");
+                    $(this).css("z-index", "10");
+                    if(permission)
+                    {
+                    	createAlert("You must follow suit");	
+                    }                    
                     return true;
                 }
                 return false;
@@ -758,7 +801,7 @@ function makeCardsDraggable()
         {
         	$(this).css("z-index", (numberOfCardsInTrick + 1)*2 + 50)
         }        
-    }).attr("dropped", "false").css("zIndex", 10);
+    }).attr("dropped", "false").css("z-index", 10);
 }
 
 function moveFocus(number)
@@ -772,37 +815,57 @@ function moveFocus(number)
 
 	if(ordinal === 0)
 	{
-		$("#bottompulsatinggreen").css("display", "");
-		$("#leftpulsatinggreen").css("display", "none");
-		$("#toppulsatinggreen").css("display", "none");
-		$("#rightpulsatinggreen").css("display", "none");
+		//$("#bottompulsatinggreen").css("display", "");
+		//$("#leftpulsatinggreen").css("display", "none");
+		//$("#toppulsatinggreen").css("display", "none");
+		//$("#rightpulsatinggreen").css("display", "none");
+		$("#bottomnamecontainer").css("background-color", "white").css("border-style", "solid").css("color", "black");
+		$("#leftnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		$("#topnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		$("#rightnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		
 		return
 	}
 	
 	if(ordinal === 1)
 	{
-		$("#bottompulsatinggreen").css("display", "none");
-		$("#leftpulsatinggreen").css("display", "");
-		$("#toppulsatinggreen").css("display", "none");
-		$("#rightpulsatinggreen").css("display", "none");
+		//$("#bottompulsatinggreen").css("display", "none");
+		//$("#leftpulsatinggreen").css("display", "");
+		//$("#toppulsatinggreen").css("display", "none");
+		//$("#rightpulsatinggreen").css("display", "none");
+		$("#bottomnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		$("#leftnamecontainer").css("background-color", "white").css("border-style", "solid").css("color", "black");
+		$("#topnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		$("#rightnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		
 		return
 	}
 	
 	if(ordinal === 2)
 	{
-		$("#bottompulsatinggreen").css("display", "none");
-		$("#leftpulsatinggreen").css("display", "none");
-		$("#toppulsatinggreen").css("display", "");
-		$("#rightpulsatinggreen").css("display", "none");
+		//$("#bottompulsatinggreen").css("display", "none");
+		//$("#leftpulsatinggreen").css("display", "none");
+		//$("#toppulsatinggreen").css("display", "");
+		//$("#rightpulsatinggreen").css("display", "none");		
+		$("#bottomnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		$("#leftnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		$("#topnamecontainer").css("background-color", "white").css("border-style", "solid").css("color", "black");
+		$("#rightnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		
 		return
 	}
 	
 	if(ordinal === 3)
 	{
-		$("#bottompulsatinggreen").css("display", "none");
-		$("#leftpulsatinggreen").css("display", "none");
-		$("#toppulsatinggreen").css("display", "none");
-		$("#rightpulsatinggreen").css("display", "");
+		//$("#bottompulsatinggreen").css("display", "none");
+		//$("#leftpulsatinggreen").css("display", "none");
+		//$("#toppulsatinggreen").css("display", "none");
+		//$("#rightpulsatinggreen").css("display", "");
+		
+		$("#bottomnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		$("#leftnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		$("#topnamecontainer").css("background-color", "transparent").css("border-style", "none").css("color", "black");
+		$("#rightnamecontainer").css("background-color", "white").css("border-style", "solid").css("color", "black");
 		return
 	}
 } 
@@ -817,17 +880,8 @@ function animateP1CardPlay(suit, number, zindex)
 	{
 		cardPath = "Rook";
 	}
-	
-	if (suit === "green")
-	{
-		extension = ".PNG";
-	}
-	else
-	{
-		extension = ".jpg";
-	}
-	
-	newCard = $("<img class='played' src='Images/cards/" + cardPath + extension + "' style='position: absolute; left: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
+		
+	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".PNG' style='position: absolute; left: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
 	$("#gametable").append(newCard);
 	
 	offset = $('#target').offset();
@@ -848,6 +902,12 @@ function animateP1CardPlay(suit, number, zindex)
 	$(newCard).animate({
 		left: offset.left - 80,
 		top: offset.top - 50
+	}, function() 
+	{
+		$(newCard).appendTo("#target").css({
+			left: "-80px",
+			top: "-50px"
+		})
 	});
 	
 }
@@ -863,16 +923,7 @@ function animateP2CardPlay(suit, number, zindex)
 		cardPath = "rook";
 	}
 	
-	if (suit === "green")
-	{
-		extension = ".PNG";
-	}
-	else
-	{
-		extension = ".jpg";
-	}
-		
-	newCard = $("<img class='played' src='Images/cards/" + cardPath + extension + "' style='position: absolute; top: -200px; z-index:" + ((zindex*2) + 50) + "'/>");
+	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".PNG' style='position: absolute; top: -200px; z-index:" + ((zindex*2) + 50) + "'/>");
 	$("#gametable").append(newCard);
 	
 	offset = $('#target').offset();
@@ -890,8 +941,14 @@ function animateP2CardPlay(suit, number, zindex)
 	})
 	
 	$(newCard).animate({
-		left: offset.left + 10,
+		left: offset.left - 10,
 		top: offset.top - 100
+	}, function() 
+	{
+		$(newCard).appendTo("#target").css({
+			left: "-10px",
+			top: "-100px"
+		})
 	});
 }
 
@@ -907,17 +964,7 @@ function animateP3CardPlay(suit, number, zindex)
 		cardPath = "rook";
 	}
 	
-	if (suit === "green")
-	{
-		extension = ".PNG";
-	}
-	else
-	{
-		extension = ".jpg";
-	}
-	
-	
-	newCard = $("<img class='played' src='Images/cards/" + cardPath + extension + "' style='position: absolute; right: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
+	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".PNG' style='position: absolute; right: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
 	$("#gametable").append(newCard);
 	
 	offset = $('#target').offset();
@@ -936,8 +983,14 @@ function animateP3CardPlay(suit, number, zindex)
 	
 	
 	$(newCard).animate({
-		left: offset.left + 80,
+		left: offset.left + 60,
 		top: offset.top - 50
+	}, function() 
+	{
+		$(newCard).appendTo("#target").css({
+			left: "60px",
+			top: "-50px"
+		})
 	});
 	
 }
@@ -945,13 +998,13 @@ function animateP3CardPlay(suit, number, zindex)
 function animateP0TrickWin()
 {
 	$(".played").each( function()
-	{
-		height = $(window).height();
+	{		
 		offset = $('#target').offset();
+		distance = $(window).height() - offset.top;
 		
 		$(this).animate({
-			top: height + "px",
-			left: offset.left
+			top: distance + "px",
+			left: 0
 		}, 1000, function ()
 		{
 			$(".played").each( function()
@@ -969,8 +1022,8 @@ function animateP1TrickWin()
 		offset = $('#target').offset();
 		
 		$(this).animate({
-			top: offset.top,
-			left: "-140px"
+			top: 0,
+			left: ((-1 * offset.left) - 150)
 		}, 1000, function ()
 		{
 			$(".played").each( function()
@@ -988,8 +1041,8 @@ function animateP2TrickWin()
 		offset = $('#target').offset();
 		
 		$(this).animate({
-			top: "-180px",
-			left: offset.left
+			top: ((-1 * offset.top) - 210),
+			left: 0
 		}, 1000, function ()
 		{
 			$(".played").each( function()
@@ -1008,8 +1061,8 @@ function animateP3TrickWin()
 		offset = $('#target').offset();
 		
 		$(this).animate({
-			top: offset.top,
-			left: width + "px"
+			top: 0,
+			left: offset.left + 160
 		}, 1000, function ()
 		{
 			$(".played").each( function()
@@ -1018,4 +1071,26 @@ function animateP3TrickWin()
 			})
 		});
 	});
+}
+
+function blinkDiv(element, toggle)
+{
+	if(toggle)
+	{		
+		if(element.css("background-color") != "transparent")
+		{
+			element.css("background-color", "#898989").css("color", "white")
+		}
+		
+		setTimeout(function() { blinkDiv(element, false); } , 2000);
+	}
+	else
+	{
+		if(element.css("background-color") != "transparent")
+		{
+			element.css("background-color", "white").css("color", "black")
+		}
+		
+		setTimeout(function() { blinkDiv(element, true); } , 2000);
+	}
 }

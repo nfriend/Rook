@@ -311,20 +311,16 @@ function init() {
 
             $(ui.draggable).attr("dropped", "true")
             
-            $("#faketarget").css("display", "none");
+            $("#faketarget").css("border-style", "none").css("background-color", "transparent").css("z-index", "49").children("p").css("display", "none");
 			
-			//$(ui.draggable).appendTo("#target");
-			
-			$(ui.draggable).appendTo("#gametable");
+			$(ui.draggable).appendTo("#target");
 
-			offset = $("#target").offset();
-			
-            spaceCards();
+			spaceCards();
             
             $(ui.draggable).css({
                 position: "absolute",
-                left: offset.left + 13 + "px",
-                top: offset.top + 7 + "px"
+                left: "13px",
+                top: "7px"
             }, 100);
         }
     });
@@ -423,4 +419,9 @@ function init() {
 	{			
 		$("#rightcardscontainer").append("<img src='Images/cards/CardBackRight.PNG' style='position: absolute; margin-top: -140px; top: " + (i + 1) * (400/10) + "px' />");
 	}
+	
+	$(".namecontainer").each(function()
+	{
+		blinkDiv($(this), false);
+	})
 }

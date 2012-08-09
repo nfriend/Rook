@@ -646,7 +646,7 @@ function getAllowedSuitsForNextPlayer($clientInfo, $teamNumber = null, $playerNu
 	$leadSuit = $trick->CardSet[0]->Suit;
 	
 	if($leadSuit === Suit::Rook)
-		$leadSuit === $round->Trump;
+		$leadSuit = $round->Trump;
 	
 	if($leadSuit === $round->Trump)
 		$trumpWasLed = true;
