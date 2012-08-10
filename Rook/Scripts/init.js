@@ -1,4 +1,14 @@
 function init() {
+	
+	//in case the browser doesn't natively support the array.forEach method
+	if ( !Array.prototype.forEach ) {
+	  Array.prototype.forEach = function(fn, scope) {
+	    for(var i = 0, len = this.length; i < len; ++i) {
+	      fn.call(scope || this, this[i], i, this);
+	    }
+	  }
+	}
+	
 	Server = new FancyWebSocket('ws://127.0.0.1:9300');
 
 	//Let the user know we're connected

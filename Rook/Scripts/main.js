@@ -8,6 +8,7 @@ var hand = [];
 var myPlayerNumber = 0;
 var allowedSuits = [];
 var numberOfCardsInTrick = 0;
+var thisGame;
 
 $(init);
 
@@ -153,7 +154,6 @@ function interpretServerMessage( payload )
 					
 				case "allgamedetails":
 					allOpenGames = message.data;
-					log(printObject(allOpenGames), "green");
 					
 					for (var g in allOpenGames)
 					{	
@@ -165,7 +165,13 @@ function interpretServerMessage( payload )
 				case "joinsuccess":
 					$("#joingamedialog").dialog("close");
 					
-					var thisGame = allOpenGames[$("#joingamedialog").data("gameid")];
+					allOpenGames.forEach(function(element, index, array)
+					{
+						if (element.id === $("#joingamedialog").data("gameid"))
+						{
+							thisGame = element;
+						}
+					});	
 					
 					currentGameId = thisGame.id;
 					
@@ -186,16 +192,13 @@ function interpretServerMessage( payload )
 				case "createsuccess":					
 					$("#creategamedialog").dialog("close");
 					
-					var thisGame;
-					
-					for(i = 0; i < allOpenGames.length; i++)
-					{
-						if(allOpenGames[i].id === message.data)
-						{
-							thisGame = allOpenGames[i];
-							break;
+					allOpenGames.forEach(function(element, index, array)
+					{	
+						if (element.id == message.data)
+						{							
+							thisGame = element;
 						}
-					}				
+					});				
 					
 					currentGameId = thisGame.id;	
 					
@@ -213,15 +216,14 @@ function interpretServerMessage( payload )
 					break;
 				
 				case "deletegame":					
-					var thisGame;					
-					for(i = 0; i < allOpenGames.length; i++)
+									
+					allOpenGames.forEach(function(element, index, array)
 					{
-						if(allOpenGames[i].id === message.data)
+						if (element.id === message.data)
 						{
-							thisGame = allOpenGames[i];
-							break;
+							thisGame = element;
 						}
-					}
+					});
 					
 					$("#gamenumber" + thisGame.id).remove();
 					
@@ -231,15 +233,13 @@ function interpretServerMessage( payload )
 					
 				case "updategame":
 					
-					var thisGame;
-					for(i = 0; i < allOpenGames.length; i++)
+					allOpenGames.forEach(function(element, index, array)
 					{
-						if(allOpenGames[i].id === message.data.gameid)
+						if (element.id === message.data.gameid)
 						{
-							thisGame = allOpenGames[i];
-							break;
+							thisGame = element;
 						}
-					}
+					});	
 					
 					thisDiv = $("#gamenumber" + thisGame.id).children(".playerlist");
 					thisDiv.html("");					
@@ -300,9 +300,17 @@ function interpretServerMessage( payload )
 					
 				case "gamefull":					
 					
-					allOpenGames[currentGameId].status = "Waiting for all players to confirm";
+					allOpenGames.forEach(function(element, index, array)
+					{
+						if (element.id === currentGameId)
+						{
+							thisGame = element;
+						}
+					});	
 					
-					$("#ingamecontainer .gamestatuscontainer").html(allOpenGames[currentGameId].status);
+					thisGame.status = "Waiting for all players to confirm";
+					
+					$("#ingamecontainer .gamestatuscontainer").html(thisGame.status);
 					
 					if (currentGameId !== -1)
 					{
@@ -395,7 +403,7 @@ function interpretServerMessage( payload )
 							if (chosenCount < 5)
 							{
 								$(event.target).data("chosenforkitty", "true");
-								$(event.target).css("bottom", "-=30px");
+								$(event.target).css("bottom", "-160px");
 								
 								if (chosenCount === 4)
 								{
@@ -415,7 +423,7 @@ function interpretServerMessage( payload )
 						else
 						{
 							$(event.target).data("chosenforkitty", "false");
-							$(event.target).css("bottom", "+=30px")
+							$(event.target).css("bottom", "-210px")
 							
 							$("#submitkitty").button("disable");
 						}						
@@ -878,7 +886,7 @@ function animateP1CardPlay(suit, number, zindex)
 	}
 	else
 	{
-		cardPath = "Rook";
+		cardPath = "rook";
 	}
 		
 	newCard = $("<img class='played' src='Images/cards/" + cardPath + ".PNG' style='position: absolute; left: -200px; top: 50%; z-index:" + ((zindex*2) + 50) + "'/>");
@@ -1075,9 +1083,12 @@ function animateP3TrickWin()
 
 function blinkDiv(element, toggle)
 {
+	//alert(element.css("background-color"));
+	//return;
+	
 	if(toggle)
-	{		
-		if(element.css("background-color") != "transparent")
+	{		 
+		if(element.css("background-color") != "transparent" && element.css("background-color") != "rgba(0, 0, 0, 0)")
 		{
 			element.css("background-color", "#898989").css("color", "white")
 		}
@@ -1086,7 +1097,7 @@ function blinkDiv(element, toggle)
 	}
 	else
 	{
-		if(element.css("background-color") != "transparent")
+		if(element.css("background-color") != "transparent" && element.css("background-color") != "rgba(0, 0, 0, 0)")
 		{
 			element.css("background-color", "white").css("color", "black")
 		}

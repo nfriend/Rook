@@ -245,6 +245,7 @@ input
 	padding-right: 15px;
 	left: 50%;
 	border-radius: 4px;
+	background-color: transparent;
 }
 
 #topnamecontainer
@@ -256,6 +257,7 @@ input
 	padding-right: 15px;
 	left: 50%;
 	border-radius: 4px;
+	background-color: transparent;
 }
 
 #leftnamecontainer
@@ -267,6 +269,7 @@ input
 	padding-left: 15px;
 	padding-right: 15px;
 	border-radius: 4px;
+	background-color: transparent;
 }
 
 #rightnamecontainer
@@ -279,6 +282,7 @@ input
 	padding-left: 15px;
 	padding-right: 15px;
 	border-radius: 4px;
+	background-color: transparent;
 }
 
 #leftpulsatinggreen

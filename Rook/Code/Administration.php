@@ -815,8 +815,10 @@ function forwardCommand($clientID, $data)
 	$clientGameInfo = getClientGame($clientID);
 	$thisGame = $clientGameInfo["game"];
 	
-	$thisGame->processCommand($clientGameInfo, $data);
-		
+	if(!is_null($thisGame))
+	{
+		$thisGame->processCommand($clientGameInfo, $data);
+	}		
 }
 
 function sendAllOpenGames($clientID)
