@@ -414,24 +414,39 @@ function init() {
 		$(this).css("border-color", "black");
 	}).filter(":first").data("chosentrump", "true").css("background-image", "url('Images/checkmark.png')");
 	
-		
-	for(i = 0; i < 10; i++)
-	{			
-		$("#topcardscontainer").append("<img src='Images/cards/CardBackTop.PNG' style='position: absolute; margin-left: -140px; left: " + (i + 1) * (700/10) + "px' />");
-	}
-	
-	for(i = 0; i < 10; i++)
-	{			
-		$("#leftcardscontainer").append("<img src='Images/cards/CardBackLeft.PNG' style='position: absolute; margin-top: -140px; top: " + (i + 1) * (400/10) + "px' />");
-	}
-	
-	for(i = 0; i < 10; i++)
-	{			
-		$("#rightcardscontainer").append("<img src='Images/cards/CardBackRight.PNG' style='position: absolute; margin-top: -140px; top: " + (i + 1) * (400/10) + "px' />");
-	}
+	initializeOtherCards();	
 	
 	$(".namecontainer").each(function()
 	{
 		blinkDiv($(this), false);
-	})
+	});
+	
+	$("#endrounddialog").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: {
+			"Ready for next round": function ()
+			{
+				var response = {};
+				response.action = "game";
+				response.data = {
+					"command": "nextgame",
+					"arguments": ""				
+				}; 
+				message = JSON.stringify(response);
+				send( message );
+			}
+		}		
+	});
+	
+	$("#endgamedialog").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: {
+			"Back to lobby": function ()
+			{
+				$("#endgamedialog").dialog("close");
+			}
+		}		
+	});
 }

@@ -693,4 +693,133 @@ function getAllowedSuitsForNextPlayer($clientInfo, $teamNumber = null, $playerNu
 	
 }
 
+function computeEndOfGameInfo($clientInfo, $winnerInfo)
+{
+	$game = $clientInfo["game"];		
+	$round = end($game->Rounds);
+	$trick = end($round->Tricks);
+	
+	$bid = $round->Bid;
+	$team1RoundScore = 0;
+	$team2RoundScore = 0;
+	$kittyValue = 0;
+	
+	foreach($round->Tricks as $trick)
+	{
+		$trickValue = 0;	
+			
+		foreach($trick->CardSet as $card)
+		{
+			$trickValue += $card->Value;
+		}
+		
+		if($trick->WinningTeam === 1)
+		{
+			$team1RoundScore += $trickValue;
+		}
+		else
+		{
+			$team2RoundScore += $trickValue;
+		}
+	}
+	
+	foreach($round->Kitty as $card)
+	{
+		$kittyValue += $card->Value;
+	}
+	
+	if($winnerInfo["team"] === $game->Team1)
+	{
+		$team1RoundScore += $kittyValue;
+	}
+	else
+	{
+		$team2RoundScore += $kittyValue;	
+	}
+	
+	if ($round->TeamBidWinner === $game->Team1)
+	{
+		$teamBidTaker = 1;	
+						
+		if($team1RoundScore < $bid)
+		{
+			$bidderMadeBid = false;
+			array_push($game->Team1->ScoreCard->Rounds, -1 * $bid);
+			array_push($game->Team2->ScoreCard->Rounds, $team2RoundScore);
+		}
+		else
+		{
+			$bidderMadeBid = true;	
+			array_push($game->Team1->ScoreCard->Rounds, $team1RoundScore);
+			array_push($game->Team2->ScoreCard->Rounds, $team2RoundScore);
+		}
+	}
+	else
+	{
+		$teamBidTaker = 2;
+						
+		if($team2RoundScore < $bid)
+		{
+			$bidderMadeBid = false;
+			array_push($game->Team2->ScoreCard->Rounds, -1 * $bid);
+			array_push($game->Team1->ScoreCard->Rounds, $team2RoundScore);
+		}
+		else
+		{
+			$bidderMadeBid = true;	
+			array_push($game->Team1->ScoreCard->Rounds, $team1RoundScore);
+			array_push($game->Team2->ScoreCard->Rounds, $team2RoundScore);
+		}
+	}
+	
+	$team1TotalScore = 0;
+	$team2TotalScore = 0;
+	
+	foreach($game->Team1->ScoreCard->Rounds as $score)
+	{
+		$team1TotalScore += $score;
+	}
+	
+	foreach($game->Team2->ScoreCard->Rounds as $score)
+	{
+		$team2TotalScore += $score;
+	}
+	
+	$teamGameWinner = 0;
+	$gameIsDone = false;
+	
+	if($team1TotalScore > $game->Rules->PlayTo)
+	{
+		$teamGameWinner = 1;
+		$gameIsDone = true;
+	}
+	
+	if($team1TotalScore > $game->Rules->PlayTo)
+	{
+		$gameIsDone = true;	
+		if ($teamGameWinner === 1)
+		{
+			$teamGameWinner = 3;
+		}
+		else
+		{
+			$teamGameWinner = 2;	
+		}		
+	}
+		
+	return array(
+		"bid"=> $bid,
+		"teamBidTaker"=> $teamBidTaker,
+		"team1RoundScore"=> $team1RoundScore,
+		"team1TotalScore"=> $team1TotalScore,
+		"team2RoundScore"=> $team2RoundScore,
+		"team2TotalScore"=> $team2TotalScore,
+		"bidderMadeBid"=> $bidderMadeBid,
+		"kittyCards"=> $round->Kitty,
+		"kittyValue"=> $kittyValue,
+		"gameIsDone"=> $gameIsDone,
+		"teamGameWinner"=> $teamGameWinner		
+	);
+}
+
 ?>

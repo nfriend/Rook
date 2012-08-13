@@ -510,6 +510,30 @@ function interpretServerMessage( payload )
 						setTimeout(animateP3TrickWin, 2000)
 					
 					break;
+					
+				case "endgame":
+					if(message.data.gameIsDone == "true")
+					{					
+						$("#endgamedialog").html(printObject(message));
+						$("#endgamedialog").dialog("open");	
+					}
+					else
+					{
+						$("#endrounddialog").html(printObject(message));
+						$("#endrounddialog").dialog("open");
+					}
+										
+					break;
+					
+				case "resetfornextgame":
+						$("#endrounddialog").dialog("close");
+						hand = [];
+						allowedSuits = [];
+						numberOfCardsInTrick = 0;
+						$("#faketarget").css("border-style", "none").css("background-color", "transparent").css("z-index", "49").children("p").css("display", "none");
+						initializeOtherCards();	
+						
+					break;
 			}
 			
 			break;
@@ -1103,5 +1127,23 @@ function blinkDiv(element, toggle)
 		}
 		
 		setTimeout(function() { blinkDiv(element, true); } , 2000);
+	}
+}
+
+function initializeOtherCards()
+{
+	for(i = 0; i < 10; i++)
+	{			
+		$("#topcardscontainer").append("<img src='Images/cards/CardBackTop.PNG' style='position: absolute; margin-left: -140px; left: " + (i + 1) * (700/10) + "px' />");
+	}
+	
+	for(i = 0; i < 10; i++)
+	{			
+		$("#leftcardscontainer").append("<img src='Images/cards/CardBackLeft.PNG' style='position: absolute; margin-top: -140px; top: " + (i + 1) * (400/10) + "px' />");
+	}
+	
+	for(i = 0; i < 10; i++)
+	{			
+		$("#rightcardscontainer").append("<img src='Images/cards/CardBackRight.PNG' style='position: absolute; margin-top: -140px; top: " + (i + 1) * (400/10) + "px' />");
 	}
 }

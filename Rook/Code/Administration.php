@@ -520,7 +520,8 @@ function chat($clientID, $message)
 
 function beginGame($thisGame)
 {
-	$thisGame->State->NextAction = "Team1Player1Bid";	
+	$thisGame->State->NextAction = "Team1Player1Bid";
+	$thisGame->BidStarter = 1;	
 	
 	array_push($thisGame->Rounds, new Round());
 				

@@ -13,7 +13,9 @@ class Game
 	
 	public $Rounds;
 	
-	public $Rules;	
+	public $Rules;
+	
+	public $BidStarter;	
 
 	function Game()
 	{
@@ -27,6 +29,8 @@ class Game
 		$this->Rounds = array();
 		
 		$this->Rules = new Rules();
+		
+		$this->BidStarter = 1;
 	}
 	
 	function processCommand($clientInfo, $data)
@@ -41,7 +45,7 @@ class Game
 						($this->State->NextAction === "Team2Player1Bid" && $clientInfo["teamNumber"] === 2 && $clientInfo["playerNumber"] === 1) ||
 						($this->State->NextAction === "Team2Player2Bid" && $clientInfo["teamNumber"] === 2 && $clientInfo["playerNumber"] === 2))
 					// the player has given an appropriate command
-					{						
+					{								
 						if ((string)$data["arguments"] === "pass")
 						// the player passes instead of bids
 						{		
@@ -643,6 +647,7 @@ class Game
 									
 									$key = array_search($highestCard, $trick->CardSet);
 									$winnerInfo = $trick->PlayerOrder[$key];
+									$trick->WinningTeam = $winnerInfo["teamNumber"];
 									$waitingOn;
 									
 									if($winnerInfo["teamNumber"] === 1 && $winnerInfo["playerNumber"] === 1)
@@ -670,6 +675,8 @@ class Game
 									if(count($round->Tricks) === 10)
 									{
 										$isLastRound = true;
+										$endOfGameInfo = computeEndOfGameInfo($clientInfo, $winnerInfo);		
+										$this->State->NextAction = "ConfirmNextGame";								
 									}
 									else
 									{
@@ -678,58 +685,88 @@ class Game
 									
 									$allClients = getAllClientIdsInGame($clientInfo["game"]);
 									
-									foreach($allClients as $id)
+									if(!$isLastRound)
 									{
-										if($id === $winnerInfo["clientId"])
+										foreach($allClients as $id)
 										{
+											if($id === $winnerInfo["clientId"])
+											{
+												$response = array(
+													"action"=>"command",
+													"message"=>"gainpermission"
+												);
+												sendJson($id, $response);
+												
+												$response = array(
+													"action"=>"command",
+													"message"=>"setallowedsuits",
+													"numberofcardsintrick"=>"0",
+													"data"=> array("black", "yellow", "red", "green", "rook")
+												);
+												sendJson($id, $response);	
+											}		
+											else
+											{
+												$response = array(
+													"action"=>"command",
+													"message"=>"losepermission"
+												);
+												sendJson($id, $response);
+											}		
+												
+											$response = array(
+												"action"=>"command",
+												"message"=>"newsfeed",
+												"data"=>"The trick was won by " . $winnerInfo["player"]->Name . " with the " . $highestCard->toString()
+											);
+											
+											sendJson($id, $response);
+											
+											$response = array(
+												"action"=>"command",
+												"message"=>"trickdone",
+												"data"=>$waitingOn
+											);
+											
+											sendJson($id, $response);											
+										}
+									}
+									else
+									// this was the last trick, the round is over 
+									{
+										foreach($allClients as $id)
+										{											
 											$response = array(
 												"action"=>"command",
 												"message"=>"gainpermission"
 											);
 											sendJson($id, $response);
+												
+											$response = array(
+												"action"=>"command",
+												"message"=>"newsfeed",
+												"data"=>"The trick was won by " . $winnerInfo["player"]->Name . " with the " . $highestCard->toString()
+											);
 											
-											$response = array(
-												"action"=>"command",
-												"message"=>"setallowedsuits",
-												"numberofcardsintrick"=>"0",
-												"data"=> array("black", "yellow", "red", "green", "rook")
-											);
-											sendJson($id, $response);	
-										}		
-										else
-										{
-											$response = array(
-												"action"=>"command",
-												"message"=>"losepermission"
-											);
 											sendJson($id, $response);
-										}		
 											
-										$response = array(
-											"action"=>"command",
-											"message"=>"newsfeed",
-											"data"=>"The trick was won by " . $winnerInfo["player"]->Name . " with the " . $highestCard->toString()
-										);
-										
-										sendJson($id, $response);
-										
-										$response = array(
-											"action"=>"command",
-											"message"=>"trickdone",
-											"data"=>$waitingOn
-										);
-										
-										sendJson($id, $response);
-										
-										if($isLastRound)
-										{
 											$response = array(
-											"action"=>"alert",
-											"message"=>"The game is over!  The kitty goes to team " . (string)$winnerInfo["teamNumber"]
-										);
-										
-										sendJson($id, $response);
-										}
+												"action"=>"command",
+												"message"=>"trickdone",
+												"data"=>$waitingOn
+											);
+											
+											sendJson($id, $response);
+											
+											
+											$response = array(
+												"action"=>"command",
+												"message"=>"endgame",
+												"data"=>$endOfGameInfo
+											);
+											
+											sendJson($id, $response);
+										}	
 									}
 
 									tellClientsWhatCardsTheyHave($clientInfo["game"]);
@@ -796,6 +833,226 @@ class Game
 					}
 					
 					break;
+				case "nextgame":
+					if ($this->State->NextAction === "ConfirmNextGame")
+					{
+						$thisGame = $clientInfo["game"];	
+						$clientInfo["player"]->NextGameConfirmed = true;
+						
+						if ($thisGame->Team1->Player1->NextGameConfirmed &&
+							$thisGame->Team1->Player2->NextGameConfirmed &&
+							$thisGame->Team2->Player1->NextGameConfirmed &&
+							$thisGame->Team2->Player2->NextGameConfirmed)
+						{
+							
+							$thisGame->Team1->Player1->HasPassed = false;
+							$thisGame->Team1->Player2->HasPassed = false;
+							$thisGame->Team2->Player1->HasPassed = false;
+							$thisGame->Team2->Player2->HasPassed = false;
+							
+							$thisGame->Team1->Player1->NextGameConfirmed = false;
+							$thisGame->Team1->Player2->NextGameConfirmed = false;
+							$thisGame->Team2->Player1->NextGameConfirmed = false;
+							$thisGame->Team2->Player2->NextGameConfirmed = false;	
+									
+							$bidStarter = $thisGame->BidStarter + 1;
+							if ($bidStarter === 5)
+								$bidStarter = 1;
+							
+							if ($bidStarter === 1)
+								$thisGame->State->NextAction = "Team1Player1Bid";
+							else if ($bidStarter === 1)
+								$thisGame->State->NextAction = "Team2Player1Bid";
+							else if ($bidStarter === 1)
+								$thisGame->State->NextAction = "Team1Player2Bid";
+							else if ($bidStarter === 1)
+								$thisGame->State->NextAction = "Team2Player2Bid";
+							
+							$thisGame->BidStarter = $bidStarter;	
+							
+							array_push($thisGame->Rounds, new Round());
+										
+							$gamePlayers = array(
+								$thisGame->Team1->Player1->ClientId,
+								$thisGame->Team2->Player1->ClientId,
+								$thisGame->Team1->Player2->ClientId,
+								$thisGame->Team2->Player2->ClientId		
+							);
+							
+							for($i = 0; $i < 4; $i++)
+							{
+								$response = array(
+									"action"=>"command", 
+									"message"=> "resetfornextgame",
+								);
+								
+								sendJson($gamePlayers[$i], $response);	
+																	
+								$response = array(
+									"action"=>"command", 
+									"message"=> "losepermission"
+								);	
+									
+								sendJson($gamePlayers[$i], $response);
+								
+								$response = array(
+									"action"=>"command", 
+									"message"=> "waitingon",
+									"data"=>($bidStarter - 1) 
+								);
+								
+								sendJson($gamePlayers[$i], $response);		
+							}
+							
+							deal($thisGame);
+							
+							$p1Cards = array();
+							$p2Cards = array();
+							$p3Cards = array();
+							$p4Cards = array();
+							$kittyCards = "";
+							
+							$round = end($thisGame->Rounds);
+							
+							if ($bidStarter === 1)
+								$round->CurrentHighestBidder = $thisGame->Team2->Player2;
+							if ($bidStarter === 2)
+								$round->CurrentHighestBidder = $thisGame->Team1->Player1;
+							if ($bidStarter === 3)
+								$round->CurrentHighestBidder = $thisGame->Team2->Player1;
+							if ($bidStarter === 4)
+								$round->CurrentHighestBidder = $thisGame->Team1->Player2;
+							
+							foreach($thisGame->Team1->Player1->Hand as $card)
+							{
+								array_push($p1Cards, array(
+									"suit"=>$card->getSuitAsString(),
+									"number"=>$card->Number
+								));						
+							}
+							foreach($thisGame->Team1->Player2->Hand as $card)
+							{		
+								array_push($p2Cards, array(
+									"suit"=>$card->getSuitAsString(),
+									"number"=>$card->Number
+								));	
+							
+							}
+							foreach($thisGame->Team2->Player1->Hand as $card)
+							{
+								array_push($p3Cards, array(
+									"suit"=>$card->getSuitAsString(),
+									"number"=>$card->Number
+								));
+							}
+							foreach($thisGame->Team2->Player2->Hand as $card)
+							{		
+								array_push($p4Cards, array(
+									"suit"=>$card->getSuitAsString(),
+									"number"=>$card->Number
+								));
+							}
+						
+							foreach($round->Kitty as $card)
+							{
+								$kittyCards = $kittyCards . $card->toString() . ", ";
+							}
+							
+							$response = array(
+								"action"=> "command",
+								"message"=> "initializecards",
+								"data"=>$p1Cards
+							);
+							
+							sendJson($thisGame->Team1->Player1->ClientId, $response);
+							
+							$response = array(
+								"action"=> "command",
+								"message"=> "notyourbid",
+								"data"=> array(
+									"bid"=> $round->Bid,
+									"highestbidder"=> $round->CurrentHighestBidder->Name
+								)
+							);
+							
+							sendJson($thisGame->Team1->Player1->ClientId, $response);
+							
+							$response = array(
+								"action"=> "command",
+								"message"=> "initializecards",
+								"data"=>$p2Cards
+							);
+							
+							sendJson($thisGame->Team1->Player2->ClientId, $response);
+							
+							$response = array(
+								"action"=> "command",
+								"message"=> "notyourbid",
+								"data"=> array(
+									"bid"=> $round->Bid,
+									"highestbidder"=> $round->CurrentHighestBidder->Name
+								)
+							);
+							
+							sendJson($thisGame->Team1->Player2->ClientId, $response);
+							
+							$response = array(
+								"action"=> "command",
+								"message"=> "initializecards",
+								"data"=>$p3Cards
+							);
+							
+							sendJson($thisGame->Team2->Player1->ClientId, $response);
+							
+							$response = array(
+								"action"=> "command",
+								"message"=> "notyourbid",
+								"data"=> array(
+									"bid"=> $round->Bid,
+									"highestbidder"=> $round->CurrentHighestBidder->Name
+								)
+							);
+							
+							sendJson($thisGame->Team2->Player1->ClientId, $response);
+							
+							$response = array(
+								"action"=> "command",
+								"message"=> "initializecards",
+								"data"=>$p4Cards
+							);
+							
+							sendJson($thisGame->Team2->Player2->ClientId, $response);
+							
+							$response = array(
+								"action"=> "command",
+								"message"=> "notyourbid",
+								"data"=> array(
+									"bid"=> $round->Bid,
+									"highestbidder"=> $round->CurrentHighestBidder->Name
+								)
+							);
+							
+							sendJson($thisGame->Team2->Player2->ClientId, $response);
+							
+							$response = array(
+								"action"=>"command",
+								"message"=>"gainpermission"
+							);
+							
+							sendJson($gamePlayers[$bidStarter - 1], $response);
+							
+							$response = array(
+								"action"=>"command",
+								"message"=>"yourbid",
+								"data"=> array(
+									"bid"=> $round->Bid,
+									"highestbidder"=> $round->CurrentHighestBidder->Name
+								)
+							);
+							
+							sendJson($gamePlayers[$bidStarter - 1], $response);
+						}						
+					}
 			}
 		}
 	}
@@ -813,7 +1070,7 @@ class Team
 		$this->Player1 = null;
 		$this->Player2 = null;
 			
-		$this->Score = new ScoreCard();		
+		$this->ScoreCard = new ScoreCard();		
 	}
 	
 	function AddPlayer($clientId)
@@ -874,6 +1131,7 @@ class Player
 	public $Hand;
 	public $HasPassed;
 	public $Confirmed;
+	public $NextGameConfirmed;
 	
 	function Player($id)
 	{
@@ -881,6 +1139,7 @@ class Player
 		$this->HasPassed = false;
 		$this->Hand = array();
 		$this->Confirmed = false;
+		$this->NextGameConfirmed = false;
 		$this->Name = "Player";
 	}
 
@@ -899,7 +1158,8 @@ class ScoreCard
 class Round
 {
 	public $Bid;
-	public $Score;
+	public $Team1Score;
+	public $Team2Score;
 	
 	public $TeamBidWinner;
 	public $PlayerBidWinner;
@@ -917,7 +1177,8 @@ class Round
 	
 	function Round()
 	{
-		$this->Score = 0;
+		$this->Team1Score = 0;
+		$this->Team2Score = 0;
 		$this->Bid = 75;
 		$this->Tricks = array();
 		$this->Kitty = array();

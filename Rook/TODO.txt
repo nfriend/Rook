@@ -1,3 +1,8 @@
 // BUG: test to make sure that people can't lay on the very first round out of turn
 
-BUG: when there's already a game going, another set of people can't get past the confirmation page... javascript errors saying "thisGame is undefined"
+// BUG: when there's already a game going, another set of people can't get past the confirmation page... javascript errors saying "thisGame is undefined"
+
+BUG: If trump is led, another player who lays the rook while having other trump gets "Sorry, you must follow suit" alert.
+
+BUG: first card laid dissappears if it's laid before the other cards have finished animating off the screen - it's because it
+	blindly deletes all cards with "played" attribute.
