@@ -512,7 +512,7 @@ function interpretServerMessage( payload )
 					break;
 					
 				case "endgame":
-					if(message.data.gameIsDone == "true")
+					if(message.data.gameIsDone !== "false")
 					{					
 						$("#endgamedialog").html(printObject(message));
 						$("#endgamedialog").dialog("open");	
@@ -640,7 +640,14 @@ function addGame(g, details)
 	
 	if(game.playto)
 	{
-		$(newHtml).children(".rulelist").append("<li>" + "The game is played to " + game.playto + " points"+ "</li>");
+		if(game.playto !== "single")
+		{
+			$(newHtml).children(".rulelist").append("<li>" + "The game is played to " + game.playto + " points"+ "</li>");
+		}
+		else
+		{
+			$(newHtml).children(".rulelist").append("<li>" + "A single round will be played"+ "</li>");
+		}
 	}
 	
 	$(newHtml).attr("id", "gamenumber" + game.id);

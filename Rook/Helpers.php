@@ -247,14 +247,17 @@ function kittyHasCard($clientInfo, $data)
 function isLegalMove($clientInfo, $trick, $card)
 {
 	if(count($trick->CardSet) === 0)
-		return true;	
+		return true;
 		
 	$game = $clientInfo["game"];
 	$round = end($game->Rounds);	
-	$trumpWasLed = false;	
+	$trumpWasLed = false;
+	
+	if(count($trick->CardSet) === 1 && $game->Rules->NoRookOnFirstTrick && $card->Suit === Suit::Rook)
+		return false;
 		
 	$suitLead = $trick->CardSet[0]->Suit;
-	if ($suitLead === Suit::Rook)
+	if ($suitLead === Suit::Rook || $suitLead === $round->Trump)
 	{
 		$suitLead = $round->Trump;
 		$trumpWasLed = true;
@@ -294,8 +297,17 @@ function isLegalMove($clientInfo, $trick, $card)
 	
 	foreach($player->Hand as $card)
 	{
-		if($suitLead === $card->Suit || ($trumpWasLed && $card->Suit === Suit::Rook))
-			return false;
+		if($game->Rules->NoRookOnFirstTrick && count($round->Tricks) === 1 && $card->Suit === Suit:: Rook)
+		{
+			if($suitLead === $card->Suit)
+				return false;
+		}	
+		else
+		{
+			if($suitLead === $card->Suit || ($trumpWasLed && $card->Suit === Suit::Rook))
+				return false;
+		}
+		
 	}
 	
 	return true;
@@ -641,6 +653,8 @@ function getAllowedSuitsForNextPlayer($clientInfo, $teamNumber = null, $playerNu
 	$trumpWasLed = false;
 	$round = end($game->Rounds);
 	$trick = end($round->Tricks);
+	$trickCount = count($round->Tricks);
+	
 	$allowedSuits = array();
 	
 	$leadSuit = $trick->CardSet[0]->Suit;
@@ -657,11 +671,23 @@ function getAllowedSuitsForNextPlayer($clientInfo, $teamNumber = null, $playerNu
 	{
 		if($trumpWasLed)
 		{
-			if ($card->Suit === $leadSuit || $card->Suit === Suit::Rook)
+			if ($trickCount === 1 && $game->Rules->NoRookOnFirstTrick)			
 			{
-				array_push($allowedSuits, $card->getSuitAsString());
-				$handContainsSuit = true;			
-				break;
+				if ($card->Suit === $leadSuit)
+				{
+					array_push($allowedSuits, $card->getSuitAsString());
+					$handContainsSuit = true;			
+					break;
+				}
+			}
+			else
+			{
+				if ($card->Suit === $leadSuit || $card->Suit === Suit::Rook)
+				{
+					array_push($allowedSuits, $card->getSuitAsString());
+					$handContainsSuit = true;			
+					break;
+				}
 			}
 		}
 		else
@@ -679,7 +705,14 @@ function getAllowedSuitsForNextPlayer($clientInfo, $teamNumber = null, $playerNu
 	{
 		if($trumpWasLed)
 		{
-			return array("rook", getSuitAsString($round->Trump));	
+			if ($trickCount === 1 && $game->Rules->NoRookOnFirstTrick)
+			{
+				return array(getSuitAsString($round->Trump));
+			}
+			else
+			{
+				return array("rook", getSuitAsString($round->Trump));	
+			}	
 		}	
 		else
 		{
@@ -688,7 +721,14 @@ function getAllowedSuitsForNextPlayer($clientInfo, $teamNumber = null, $playerNu
 	}
 	else
 	{
-		return array("black", "yellow", "red", "green", "rook");
+		if ($trickCount === 1 && $game->Rules->NoRookOnFirstTrick)
+		{	
+			return array("black", "yellow", "red", "green");
+		}
+		else
+		{
+			return array("black", "yellow", "red", "green", "rook");
+		}
 	}
 	
 }
@@ -788,7 +828,7 @@ function computeEndOfGameInfo($clientInfo, $winnerInfo)
 	$teamGameWinner = 0;
 	$gameIsDone = false;
 	
-	if($team1TotalScore > $game->Rules->PlayTo)
+	if($game->Rules->PlayTo === "single" || $team1TotalScore > $game->Rules->PlayTo)
 	{
 		$teamGameWinner = 1;
 		$gameIsDone = true;

@@ -25,7 +25,7 @@ function deal($game)
 		$deck[] = new Card($color, 1, 15);
 	}
 	
-	$deck[] = new Card(Suit::Rook, 10.5, 20);
+	$deck[] = new Card(Suit::Rook, $game->Rules->RookValue, 20);
 	
 	shuffle($deck);
 	

@@ -63,17 +63,36 @@ function getClientGame($clientID)
 		}		
 	}
 	
-	$responseObject = array(
-		"gameId" => $clientGameId,
-		"clientId" => $clientID,
-		"teamNumber" => $clientTeamNumber,
-		"playerNumber" => $clientPlayerNumber,
-		"playerName" => $clientName,
-		"game" => $game,
-		"team" => $team,
-		"player" => $player		
-	);
-		
+	if(!is_null($game) && $game->DeleteMe)
+	{
+		$index = array_search($game, $gameArray);
+		unset($gameArray[$index]);	
+			
+		$responseObject = array(
+			"gameId" => -1,
+			"clientId" => $clientID,
+			"teamNumber" => -1,
+			"playerNumber" => -1,
+			"playerName" => "",
+			"game" => null,
+			"team" => null,
+			"player" => null		
+		);
+	}
+	else
+	{
+		$responseObject = array(
+			"gameId" => $clientGameId,
+			"clientId" => $clientID,
+			"teamNumber" => $clientTeamNumber,
+			"playerNumber" => $clientPlayerNumber,
+			"playerName" => $clientName,
+			"game" => $game,
+			"team" => $team,
+			"player" => $player		
+		);	
+	}	
+	
 	return $responseObject;
 }
 

@@ -16,6 +16,8 @@ class Game
 	public $Rules;
 	
 	public $BidStarter;	
+	
+	public $DeleteMe;
 
 	function Game()
 	{
@@ -31,6 +33,8 @@ class Game
 		$this->Rules = new Rules();
 		
 		$this->BidStarter = 1;
+		
+		$this->DeleteMe = false;
 	}
 	
 	function processCommand($clientInfo, $data)
@@ -565,6 +569,18 @@ class Game
 							if(isLegalMove($clientInfo, $trick, $card))
 							// make sure the player is properly following suit
 							{
+								if ($card->Suit === Suit::Rook && $this->Rules->NoRookOnFirstTrick && count($round->Tricks) === 1)
+								{
+									$response = array(
+										"action"=>"alert",
+										"message"=>"You cannot play the Rook on the first trick"
+									);
+								
+									sendJson($clientInfo["clientId"], $response);
+									
+									return;
+								}	
+									
 								array_push($trick->CardSet, $card);
 								array_push($trick->PlayerOrder, $clientInfo);
 								
@@ -671,6 +687,8 @@ class Game
 										$waitingOn = 3;
 									}
 									
+									$endOfGameInfo = null;
+									
 									$isLastRound = false;
 									if(count($round->Tricks) === 10)
 									{
@@ -730,6 +748,11 @@ class Game
 											
 											sendJson($id, $response);											
 										}
+										
+										if(!is_null($endOfGameInfo) && $endOfGameInfo["gameIsDone"])
+										{
+											$this->DeleteMe = true;
+										}
 									}
 									else
 									// this was the last trick, the round is over 
@@ -769,7 +792,7 @@ class Game
 										}	
 									}
 
-									tellClientsWhatCardsTheyHave($clientInfo["game"]);
+									//tellClientsWhatCardsTheyHave($clientInfo["game"]);
 
 								}
 								else
@@ -861,11 +884,11 @@ class Game
 							
 							if ($bidStarter === 1)
 								$thisGame->State->NextAction = "Team1Player1Bid";
-							else if ($bidStarter === 1)
+							else if ($bidStarter === 2)
 								$thisGame->State->NextAction = "Team2Player1Bid";
-							else if ($bidStarter === 1)
+							else if ($bidStarter === 3)
 								$thisGame->State->NextAction = "Team1Player2Bid";
-							else if ($bidStarter === 1)
+							else if ($bidStarter === 4)
 								$thisGame->State->NextAction = "Team2Player2Bid";
 							
 							$thisGame->BidStarter = $bidStarter;	

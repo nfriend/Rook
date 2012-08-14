@@ -446,6 +446,16 @@ function init() {
 			"Back to lobby": function ()
 			{
 				$("#endgamedialog").dialog("close");
+				$("#gametable").css("display", "none");				
+				$("#gameaccordiancontainer").css("display", "");
+				$("#ingamecontainer").css("display", "none");
+				$("#lobby").css("display", "");
+				var currentGameId = -1;
+				var hand = [];
+				var myPlayerNumber = 0;
+				var allowedSuits = [];
+				var numberOfCardsInTrick = 0;
+				var thisGame;
 			}
 		}		
 	});
