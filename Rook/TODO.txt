@@ -7,4 +7,3 @@
 BUG: first card laid dissappears if it's laid before the other cards have finished animating off the screen - it's because it
 	blindly deletes all cards with "played" attribute.
 	
-TEST: make sure the game is destroyed when it's over

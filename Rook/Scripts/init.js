@@ -446,16 +446,18 @@ function init() {
 			"Back to lobby": function ()
 			{
 				$("#endgamedialog").dialog("close");
-				$("#gametable").css("display", "none");				
+				$("#gametable").css("display", "none");
+				$("#faketarget").css("border-style", "none").css("background-color", "transparent").css("z-index", "49").children("p").css("display", "none");				
 				$("#gameaccordiancontainer").css("display", "");
 				$("#ingamecontainer").css("display", "none");
 				$("#lobby").css("display", "");
-				var currentGameId = -1;
-				var hand = [];
-				var myPlayerNumber = 0;
-				var allowedSuits = [];
-				var numberOfCardsInTrick = 0;
-				var thisGame;
+				initializeOtherCards();
+				currentGameId = -1;
+				hand = [];
+				myPlayerNumber = 0;
+				allowedSuits = [];
+				numberOfCardsInTrick = 0;
+				thisGame = null;
 			}
 		}		
 	});

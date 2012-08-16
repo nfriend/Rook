@@ -63,10 +63,10 @@ function getClientGame($clientID)
 		}		
 	}
 	
-	if(!is_null($game) && $game->DeleteMe)
+	if(!(is_null($game)) && $game->DeleteMe)
 	{
 		$index = array_search($game, $gameArray);
-		unset($gameArray[$index]);	
+		unset($gameArray[$index]);
 			
 		$responseObject = array(
 			"gameId" => -1,
@@ -107,7 +107,8 @@ function addGame($clientID, $gameDetails)
 	
 	if ($clientGameId === -1)
 	{
-		$newGame = new Game();					
+		$newGame = new Game();
+						
 		$newGame->Team1->AddPlayer($clientID);	
 		
 		if ($gameDetails["rookvalue"] === "10.5")

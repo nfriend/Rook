@@ -748,11 +748,6 @@ class Game
 											
 											sendJson($id, $response);											
 										}
-										
-										if(!is_null($endOfGameInfo) && $endOfGameInfo["gameIsDone"])
-										{
-											$this->DeleteMe = true;
-										}
 									}
 									else
 									// this was the last trick, the round is over 
@@ -789,10 +784,13 @@ class Game
 											);
 											
 											sendJson($id, $response);
+										}
+										
+										if(!(is_null($endOfGameInfo)) && $endOfGameInfo["gameIsDone"])
+										{
+											$this->DeleteMe = true;											
 										}	
 									}
-
-									//tellClientsWhatCardsTheyHave($clientInfo["game"]);
 
 								}
 								else

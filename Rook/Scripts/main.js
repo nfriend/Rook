@@ -39,8 +39,18 @@ var sortMethod = function compare(a, b) {
 
 function log(text, color) {
 						
-	text = text.replace(/:D/g, '<img style="vertical-align:middle;" src="http://www.animated-gifs.eu/anisigns/signer/laughing/laughing.gif" />');
+	text = htmlEscape(text);
 	
+	text = text.replace(/:\)|:-\)|\(-:|\(:/g, 				'<img style="vertical-align:middle;" src="Images/emoticons/smile.gif" />');
+	text = text.replace(/:\(|:-\(|\):|\)-:/g, 				'<img style="vertical-align:middle;" src="Images/emoticons/frown.gif" />');
+	text = text.replace(/:D|:-D/g, 							'<img style="vertical-align:middle;" src="Images/emoticons/laughing.gif" />');
+	text = text.replace(/:o|:O|:-o|:-O|O-:|o-:|O:|o:/g, 	'<img style="vertical-align:middle;" src="Images/emoticons/oh.gif" />');
+	text = text.replace(/:'\(|\)':/g, 						'<img style="vertical-align:middle;" src="Images/emoticons/tear.gif" />');
+	text = text.replace(/:p|:P|:-p|:-P/g,	 				'<img style="vertical-align:middle;" src="Images/emoticons/tongue.gif" />');
+	text = text.replace(/;\)|;-\)|\(;|\(-;/g, 				'<img style="vertical-align:middle;" src="Images/emoticons/wink.gif" />');
+	
+	text = text.replace(/nathan\sfriend/gi, '<img style="vertical-align:middle; margin-left: -5px; margin-right: -5px" src="Images/emoticons/nf.PNG" />');
+	text = text.replace(/nathan/gi, '<img style="vertical-align:middle; margin-left: -5px; margin-right: -5px" src="Images/emoticons/nathan.PNG" />');		
 	if(!color)
 	{
 		color = "red"
@@ -136,20 +146,15 @@ function interpretServerMessage( payload )
 			break;
 			
 		case "command":
-			
-			log(printObject(message), "green");
-			
 			command = message.message;
 			switch(command)
 			{
 				case "losepermission":
 					window.permission = false;
-					log("Lost permission");
 					break;
 				
 				case "gainpermission":
 					window.permission = true;
-					log("Gained permission");
 					break;
 					
 				case "allgamedetails":
@@ -515,7 +520,7 @@ function interpretServerMessage( payload )
 					if(message.data.gameIsDone !== "false")
 					{					
 						$("#endgamedialog").html(printObject(message));
-						$("#endgamedialog").dialog("open");	
+						setTimeout( function () { $("#endgamedialog").dialog("open"); }, 1500);	
 					}
 					else
 					{
@@ -526,7 +531,7 @@ function interpretServerMessage( payload )
 					break;
 					
 				case "resetfornextgame":
-						$("#endrounddialog").dialog("close");
+						setTimeout( function () { $("#endrounddialog").dialog("close"); }, 1500);
 						hand = [];
 						allowedSuits = [];
 						numberOfCardsInTrick = 0;
@@ -1153,4 +1158,9 @@ function initializeOtherCards()
 	{			
 		$("#rightcardscontainer").append("<img src='Images/cards/CardBackRight.PNG' style='position: absolute; margin-top: -140px; top: " + (i + 1) * (400/10) + "px' />");
 	}
+}
+
+function htmlEscape(text)
+{
+	return $("<div></div>").text(text).html();
 }
