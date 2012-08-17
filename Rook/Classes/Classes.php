@@ -786,7 +786,7 @@ class Game
 											sendJson($id, $response);
 										}
 										
-										if(!(is_null($endOfGameInfo)) && $endOfGameInfo["gameIsDone"])
+										if(!(is_null($endOfGameInfo)) && $endOfGameInfo["gameIsDone"] === "yes")
 										{
 											$this->DeleteMe = true;											
 										}	

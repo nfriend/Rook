@@ -517,15 +517,15 @@ function interpretServerMessage( payload )
 					break;
 					
 				case "endgame":
-					if(message.data.gameIsDone !== "false")
+					if(message.data.gameIsDone === "yes")
 					{					
-						$("#endgamedialog").html(printObject(message));
+						$("#endgamedialog").data("endofgamedata", message.data);
 						setTimeout( function () { $("#endgamedialog").dialog("open"); }, 1500);	
 					}
 					else
-					{
-						$("#endrounddialog").html(printObject(message));
-						$("#endrounddialog").dialog("open");
+					{						
+						$("#endrounddialog").data("endofgamedata", message.data);
+						setTimeout( function () { $("#endrounddialog").dialog("open"); }, 1500);
 					}
 										
 					break;

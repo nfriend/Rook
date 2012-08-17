@@ -826,12 +826,12 @@ function computeEndOfGameInfo($clientInfo, $winnerInfo)
 	}
 	
 	$teamGameWinner = 0;
-	$gameIsDone = false;
+	$gameIsDone = "no";
 	
 	if($game->Rules->PlayTo === "single" || $team1TotalScore > $game->Rules->PlayTo)
 	{
 		$teamGameWinner = 1;
-		$gameIsDone = true;
+		$gameIsDone = "yes";
 	}
 	
 	if($team1TotalScore > $game->Rules->PlayTo)
@@ -855,7 +855,7 @@ function computeEndOfGameInfo($clientInfo, $winnerInfo)
 		"team2RoundScore"=> $team2RoundScore,
 		"team2TotalScore"=> $team2TotalScore,
 		"bidderMadeBid"=> $bidderMadeBid,
-		"kittyCards"=> $round->Kitty,
+		"kittyCards"=> cardsToJsonArray($round->Kitty),
 		"kittyValue"=> $kittyValue,
 		"gameIsDone"=> $gameIsDone,
 		"teamGameWinner"=> $teamGameWinner		

@@ -424,9 +424,44 @@ function init() {
 	$("#endrounddialog").dialog({
 		autoOpen: false,
 		modal: true,
+		width: 550,
+		height: 600,
+		resizable: false,
+		open: function ()
+		{	
+			data = $("#endrounddialog").data("endofgamedata");
+			
+			if((data.teamBidTaker == "2" && data.bidderMadeBid) || (data.teamBidTaker == "1" && !(data.bidderMadeBid)))
+				teamWinner = 2;
+			else
+				teamWinner = 1;
+			
+			dialog = $("#endrounddialog");
+			dialog.html("<p style='font-size: 1.2em'>Team " + teamWinner + " has won the round!</p>");
+			dialog.append("<p style='font-size: 1.0em'>Round bid: " + data.bid + "</p>");
+			dialog.append("<p style='float:left; text-align: center; width: 250px'>Team 1's round score: <strong>" + data.team1RoundScore + "</strong></p>");
+			dialog.append("<p style='float:right; text-align: center; width: 250px'>Team 2's round score: <strong>" + data.team2RoundScore + "</strong></p>");
+			dialog.append("<div style='clear:both'></div>");
+			dialog.append("<p style='float:left; text-align: center; width: 250px'>Team 1's total score: <strong>" + data.team1TotalScore + "</strong></p>");
+			dialog.append("<p style='float:right; text-align: center; width: 250px'>Team 2's total score: <strong>" + data.team2TotalScore + "</strong></p>");
+			dialog.append("<div style='clear:both'></div>");
+			dialog.append("<p>Cards in the kitty:</p>");
+			dialog.append("<div id='endroundcardcontainer' style='position: absolute; top: 250px; width: 80%; background-color: red; left: 80px'></div>");
+			for(i = 0; i < 5; i++)
+			{
+				if (data.kittyCards[i].suit === "rook")
+					cardname = "rook.PNG";
+				else
+					cardname = data.kittyCards[i].suit + data.kittyCards[i].number + ".PNG";
+				
+				$("#endroundcardcontainer").append("<img src='Images/cards/" + cardname + "' style='position: absolute; margin-left:-136px; left: " + ((100/5) * (i+1)) + "%;' />");
+			}
+			dialog.append("<em id='roundstatus' style='visibility: hidden; position:absolute; bottom: 10px; width:270px'>Waiting on other players...</em>");
+		},
 		buttons: {
 			"Ready for next round": function ()
-			{
+			{	
+				$("#roundstatus").css("visibility", "visible");
 				var response = {};
 				response.action = "game";
 				response.data = {
@@ -434,7 +469,7 @@ function init() {
 					"arguments": ""				
 				}; 
 				message = JSON.stringify(response);
-				send( message );
+				send( message );				
 			}
 		}		
 	});
@@ -442,6 +477,40 @@ function init() {
 	$("#endgamedialog").dialog({
 		autoOpen: false,
 		modal: true,
+		width: 550,
+		height: 600,
+		resizable: false,
+		open: function()
+		{
+			data = $("#endgamedialog").data("endofgamedata");
+						
+			if(parseInt(data.team1TotalScore, 10) < parseInt(data.team2TotalScore, 10))
+				teamWinner = 2;
+			else
+				teamWinner = 1;
+			
+			dialog = $("#endgamedialog");
+			dialog.html("<p style='font-size: 1.2em'>Team " + teamWinner + " has won the game!</p>");
+			dialog.append("<p style='font-size: 1.0em'>Round bid: " + data.bid + "</p>");
+			dialog.append("<p style='float:left; text-align: center; width: 250px'>Team 1's round score: <strong>" + data.team1RoundScore + "</strong></p>");
+			dialog.append("<p style='float:right; text-align: center; width: 250px'>Team 2's round score: <strong>" + data.team2RoundScore + "</strong></p>");
+			dialog.append("<div style='clear:both'></div>");
+			dialog.append("<p style='float:left; text-align: center; width: 250px'>Team 1's total score: <strong>" + data.team1TotalScore + "</strong></p>");
+			dialog.append("<p style='float:right; text-align: center; width: 250px'>Team 2's total score: <strong>" + data.team2TotalScore + "</strong></p>");
+			dialog.append("<div style='clear:both'></div>");
+			dialog.append("<p>Cards in the kitty:</p>");
+			dialog.append("<div id='endgamecardcontainer' style='position: absolute; top: 250px; width: 80%; background-color: red; left: 80px'></div>");
+			for(i = 0; i < 5; i++)
+			{
+				if (data.kittyCards[i].suit === "rook")
+					cardname = "rook.PNG";
+				else
+					cardname = data.kittyCards[i].suit + data.kittyCards[i].number + ".PNG";
+				
+				$("#endgamecardcontainer").append("<img src='Images/cards/" + cardname + "' style='position: absolute; margin-left:-136px; left: " + ((100/5) * (i+1)) + "%;' />");
+			}
+			
+		},
 		buttons: {
 			"Back to lobby": function ()
 			{
@@ -461,4 +530,6 @@ function init() {
 			}
 		}		
 	});
+	
+	$(".ui-dialog-titlebar-close").remove();	
 }
