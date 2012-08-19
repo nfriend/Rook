@@ -1,0 +1,220 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Rook!</title>
+	<meta charset='UTF-8' />
+	<style>
+		input, textarea {border:1px solid #CCC;margin:0px;padding:0px}
+
+		#body {max-width:800px;margin:auto}
+		#log {width:100%;height:400px}
+		#message {width:100%;line-height:20px}
+	</style>
+	
+	<script src="jQuery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+	<script src="jQuery/js/jquery-ui-1.8.22.custom.min.js" type="text/javascript"></script>
+	<script src="Scripts/fancywebsocket.js" type="text/javascript"></script>
+	
+	<script>
+		var Server;
+		window.permission = true;
+
+		function log( text ) {
+			$log = $('#log');
+			//Add text to log
+			$log.append(($log.val()?"\n":'')+text);
+			//Autoscroll
+			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
+		}
+
+		function send( text ) {
+			Server.send( 'message', text );
+		}
+
+		$(document).ready(function() {
+			log('Connecting...');
+			Server = new FancyWebSocket('ws://127.0.0.1:9300');
+
+			$('#newbutton').add('#leavebutton').click(function(e) {
+				var response = {};
+				response.action = $(this).val();
+				response.data = $("#gamename").val(); 
+				message = JSON.stringify(response);
+				log( '-> You: ' + message );
+				send( message );
+			});
+
+			$('#joinbutton').click(function(e)
+			{
+				var response = {};
+				response.action = "join"
+				response.data = {
+					game: $('#gamenumber').val(),
+					team: $('#teamnumber').val()
+				} 
+				message = JSON.stringify(response);
+				log( 'You: ' + message );
+				send( message );
+			});
+
+			$('#bidbutton').click(function(e)
+			{
+				var response = {};
+				response.action = "game";
+				response.data = {
+					"command": "bid",
+					"arguments": $('#bidamount').val()
+				}; 
+				message = JSON.stringify(response);
+				log( 'You: ' + message );
+				send( message );
+			});
+
+			$('#chatbutton').click(function(e)
+			{
+				var response = {};
+				response.action = "chat"
+				response.data = $('#chattext').val(); 
+				message = JSON.stringify(response);
+				log( 'You: ' + response.data);
+				send( message );
+			});
+			
+			$('#readybutton').click(function(e)
+			{
+				var response = {};
+				response.action = "confirm";
+				response.data = ""; 
+				message = JSON.stringify(response);
+				send( message );
+			});
+
+			$('#laybutton').click(function(e)
+			{
+				var response = {};
+				response.action = "game"
+				response.data = {
+					"command": "lay",
+					"arguments": {
+						"suit": $('#cardsuit').val(),
+						"number": $('#number').val()
+					}					
+				} 
+				message = JSON.stringify(response);
+				log( 'You: ' + message);
+				send( message );
+			});
+
+			$('#kittybutton').click(function(e)
+			{
+				var response = {};
+				response.action = "game"
+				response.data = {
+					"command": "kitty",
+					"arguments": [
+						{
+							"suit": $('#kittysuit1').val(),
+							"number": $('#kittynumber1').val()
+						},
+						{
+							"suit": $('#kittysuit2').val(),
+							"number": $('#kittynumber2').val()
+						},
+						{
+							"suit": $('#kittysuit3').val(),
+							"number": $('#kittynumber3').val()
+						},
+						{
+							"suit": $('#kittysuit4').val(),
+							"number": $('#kittynumber4').val()
+						},
+						{
+							"suit": $('#kittysuit5').val(),
+							"number": $('#kittynumber5').val()
+						},
+					],
+					"trumpcolor": $('select option:selected').val()					
+				} 
+				message = JSON.stringify(response);
+				log( 'You: ' + message);
+				send( message );
+			});
+
+
+			//Let the user know we're connected
+			Server.bind('open', function() {
+				log( "Connected." );
+			});
+
+			//OH NOES! Disconnection occurred.
+			Server.bind('close', function( data ) {
+				log( "Disconnected." );
+			});
+
+			//Log any messages sent from server
+			Server.bind('message', function( payload ) {
+				var message = JSON.parse(payload);
+				if (message.action && (message.action == "log"))
+				{
+					log("Log: " + message.message);	
+				}
+				else if (message.action && (message.action == "chat"))
+				{			
+					log(message.message);
+				} 
+				else if (message.action && (message.action == "command"))
+				{
+					command = message.message;
+					switch(command)
+					{
+						case "losepermission":
+							window.permission = false;
+							log("Lost permission");
+							break;
+						case "gainpermission":
+							window.permission = true;
+							log("Gained permission");
+							break;
+					}
+				}
+				else
+				{
+					log(JSON.stringify(message));
+				}
+			});
+
+			Server.connect();
+		});
+	</script>
+</head>
+
+<body>
+	<div id='body'>
+		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
+		<button id="newbutton" value="new">New Game</button><input id="gamename" />
+		<button id="joinbutton" value="join">Join</button><input id="gamenumber" /><input id="teamnumber" style='width:40px;' /><br />
+		<button id="leavebutton" value="leave">Leave</button>
+		<button id="bidbutton" value="bid">Bid</button><input id="bidamount" /><br />
+		<button id="exitbutton" value="exit">Exit</button>
+		<button id="chatbutton" value="chat">Chat</button><input id="chattext" /><br />
+		<button id="laybutton" value="lay">Lay</button><input id="cardsuit" /><input id="number" style='width:40px;' /><br />
+		<button id="kittybutton" value="lay">Kitty</button><br />
+			<input id="kittysuit1" /><input id="kittynumber1" style='width:40px;' /><br />
+			<input id="kittysuit2" /><input id="kittynumber2" style='width:40px;' /><br />
+			<input id="kittysuit3" /><input id="kittynumber3" style='width:40px;' /><br />
+			<input id="kittysuit4" /><input id="kittynumber4" style='width:40px;' /><br />
+			<input id="kittysuit5" /><input id="kittynumber5" style='width:40px;' /><br />
+		Trump:
+		<select>
+			<option value="green">Green</option>
+			<option value="black">Black</option>
+			<option value="red">Red</option>
+			<option value="yellow">Yellow</option>
+		</select>
+		<button id="readybutton" value="ready">Ready</button><br />
+
+
+	</div>
+</body>
+
+</html>

@@ -1,220 +1,211 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-	<title>Rook!</title>
-	<meta charset='UTF-8' />
-	<style>
-		input, textarea {border:1px solid #CCC;margin:0px;padding:0px}
-
-		#body {max-width:800px;margin:auto}
-		#log {width:100%;height:400px}
-		#message {width:100%;line-height:20px}
-	</style>
-	
-	<script src="jQuery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-	<script src="jQuery/js/jquery-ui-1.8.22.custom.min.js" type="text/javascript"></script>
-	<script src="Scripts/fancywebsocket.js" type="text/javascript"></script>
-	
-	<script>
-		var Server;
-		window.permission = true;
-
-		function log( text ) {
-			$log = $('#log');
-			//Add text to log
-			$log.append(($log.val()?"\n":'')+text);
-			//Autoscroll
-			$log[0].scrollTop = $log[0].scrollHeight - $log[0].clientHeight;
-		}
-
-		function send( text ) {
-			Server.send( 'message', text );
-		}
-
-		$(document).ready(function() {
-			log('Connecting...');
-			Server = new FancyWebSocket('ws://127.0.0.1:9300');
-
-			$('#newbutton').add('#leavebutton').click(function(e) {
-				var response = {};
-				response.action = $(this).val();
-				response.data = $("#gamename").val(); 
-				message = JSON.stringify(response);
-				log( '-> You: ' + message );
-				send( message );
-			});
-
-			$('#joinbutton').click(function(e)
-			{
-				var response = {};
-				response.action = "join"
-				response.data = {
-					game: $('#gamenumber').val(),
-					team: $('#teamnumber').val()
-				} 
-				message = JSON.stringify(response);
-				log( 'You: ' + message );
-				send( message );
-			});
-
-			$('#bidbutton').click(function(e)
-			{
-				var response = {};
-				response.action = "game";
-				response.data = {
-					"command": "bid",
-					"arguments": $('#bidamount').val()
-				}; 
-				message = JSON.stringify(response);
-				log( 'You: ' + message );
-				send( message );
-			});
-
-			$('#chatbutton').click(function(e)
-			{
-				var response = {};
-				response.action = "chat"
-				response.data = $('#chattext').val(); 
-				message = JSON.stringify(response);
-				log( 'You: ' + response.data);
-				send( message );
-			});
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		
+		<title>Rook!</title>
+		
+		<meta name="description" content="Rook!  An online, multiplayer card game." />
+		<meta name="author" content="Nathan Friend" />
+		<meta name="viewport" content="width=device-width; initial-scale=1.0" />
+		
+		<link rel="shortcut icon" href="favicon.ico" />		
+		<link href="Styles/stylesheet.css" rel="stylesheet" type="text/css" />
+		<link href='http://fonts.googleapis.com/css?family=Quando' rel='stylesheet' type='text/css'>
+		<link href="jQuery/css/custom-theme/jquery-ui-1.8.22.custom.css" rel='stylesheet' type="text/css" />
+		
+		<script src="jQuery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+		<script src="jQuery/js/jquery-ui-1.8.22.custom.min.js" type="text/javascript"></script>
+		<script src="Scripts/fancywebsocket.js" type="text/javascript"></script>			
+		<script src="Scripts/init.js" type="text/javascript"></script>
+		<script src="Scripts/main.js" type="text/javascript"></script>
 			
-			$('#readybutton').click(function(e)
-			{
-				var response = {};
-				response.action = "confirm";
-				response.data = ""; 
-				message = JSON.stringify(response);
-				send( message );
-			});
+	</head>
 
-			$('#laybutton').click(function(e)
-			{
-				var response = {};
-				response.action = "game"
-				response.data = {
-					"command": "lay",
-					"arguments": {
-						"suit": $('#cardsuit').val(),
-						"number": $('#number').val()
-					}					
-				} 
-				message = JSON.stringify(response);
-				log( 'You: ' + message);
-				send( message );
-			});
-
-			$('#kittybutton').click(function(e)
-			{
-				var response = {};
-				response.action = "game"
-				response.data = {
-					"command": "kitty",
-					"arguments": [
-						{
-							"suit": $('#kittysuit1').val(),
-							"number": $('#kittynumber1').val()
-						},
-						{
-							"suit": $('#kittysuit2').val(),
-							"number": $('#kittynumber2').val()
-						},
-						{
-							"suit": $('#kittysuit3').val(),
-							"number": $('#kittynumber3').val()
-						},
-						{
-							"suit": $('#kittysuit4').val(),
-							"number": $('#kittynumber4').val()
-						},
-						{
-							"suit": $('#kittysuit5').val(),
-							"number": $('#kittynumber5').val()
-						},
-					],
-					"trumpcolor": $('select option:selected').val()					
-				} 
-				message = JSON.stringify(response);
-				log( 'You: ' + message);
-				send( message );
-			});
-
-
-			//Let the user know we're connected
-			Server.bind('open', function() {
-				log( "Connected." );
-			});
-
-			//OH NOES! Disconnection occurred.
-			Server.bind('close', function( data ) {
-				log( "Disconnected." );
-			});
-
-			//Log any messages sent from server
-			Server.bind('message', function( payload ) {
-				var message = JSON.parse(payload);
-				if (message.action && (message.action == "log"))
-				{
-					log("Log: " + message.message);	
-				}
-				else if (message.action && (message.action == "chat"))
-				{			
-					log(message.message);
-				} 
-				else if (message.action && (message.action == "command"))
-				{
-					command = message.message;
-					switch(command)
-					{
-						case "losepermission":
-							window.permission = false;
-							log("Lost permission");
-							break;
-						case "gainpermission":
-							window.permission = true;
-							log("Gained permission");
-							break;
-					}
-				}
-				else
-				{
-					log(JSON.stringify(message));
-				}
-			});
-
-			Server.connect();
-		});
-	</script>
-</head>
-
-<body>
-	<div id='body'>
-		<textarea id='log' name='log' readonly='readonly'></textarea><br/>
-		<button id="newbutton" value="new">New Game</button><input id="gamename" />
-		<button id="joinbutton" value="join">Join</button><input id="gamenumber" /><input id="teamnumber" style='width:40px;' /><br />
-		<button id="leavebutton" value="leave">Leave</button>
-		<button id="bidbutton" value="bid">Bid</button><input id="bidamount" /><br />
-		<button id="exitbutton" value="exit">Exit</button>
-		<button id="chatbutton" value="chat">Chat</button><input id="chattext" /><br />
-		<button id="laybutton" value="lay">Lay</button><input id="cardsuit" /><input id="number" style='width:40px;' /><br />
-		<button id="kittybutton" value="lay">Kitty</button><br />
-			<input id="kittysuit1" /><input id="kittynumber1" style='width:40px;' /><br />
-			<input id="kittysuit2" /><input id="kittynumber2" style='width:40px;' /><br />
-			<input id="kittysuit3" /><input id="kittynumber3" style='width:40px;' /><br />
-			<input id="kittysuit4" /><input id="kittynumber4" style='width:40px;' /><br />
-			<input id="kittysuit5" /><input id="kittynumber5" style='width:40px;' /><br />
-		Trump:
-		<select>
-			<option value="green">Green</option>
-			<option value="black">Black</option>
-			<option value="red">Red</option>
-			<option value="yellow">Yellow</option>
-		</select>
-		<button id="readybutton" value="ready">Ready</button><br />
-
-
-	</div>
-</body>
-
+	<body>
+		<div id="startpage" style="display: display;">
+			<img style="position: absolute; left: 50%; margin-left: -330px; top: 40px;" src="Images/rooktext.jpg" alt="Rook!"/>
+			<img style="position: absolute; left: 50%; margin-left: 80px; top: 150px;" src="Images/bird.jpg" alt="Rook!"/>
+			<img style="position: absolute; left: 50%; margin-left: 50px; top: 60px;" src="Images/beta.PNG" alt="beta" />
+			<img style="position: absolute; right: 10px; bottom: 5px;" src="Images/signature.PNG" alt="beta" />
+			<div style="position:absolute; left: 50%; margin-left: -300px; top: 370px;"><p style="margin-bottom: 2px;">Your name: </p><input id="playername" type="text" /></div>
+			<div id="playername_button" style="position:absolute; left: 50%; margin-left: -300px; top: 470px;">Enter!</div>					
+ 		</div>
+ 		<div id="connectingpage" style="display: none;">
+ 			<div style="position: absolute; left: 50%; margin-left: -100px; top: 200px;">Connecting...</div> 			
+ 		</div>
+ 		<div id="lobby" style="display: none;">
+ 			<div id="gamecontainer">
+ 				<div id="gameaccordiancontainer" style="height: 80%; overflow-y: scroll; margin-top: 20px; padding-right: 10px; display:display;">
+	 				<div style="margin-top: 20px; margin-bottom: 20px;"> Open games:</div>
+	 				<div id="gamedescription"></div>
+	 				<div id="lobbybuttonscontainer" style="position: absolute; top: 80%; margin-top: 30px;">
+	 					<div id="creategamebutton" style="float: left;">Create a game</div>	 					
+	 				</div>
+	 			</div>
+	 			<div id="ingamecontainer" style="height: 80%; margin-top: 20px; padding-right: 10px; display: none;">
+	 				<div id="gametitlediv" style="margin-top: 20px; margin-bottom: 20px;"></div>
+	 				<div id="gamedetails" style="font-size: .7em;">	 									
+						<div class="gamestatuscontainer" style="float: left;"></div><br /><br />
+						<div style="float: left;">Players in this game:</div><br />
+							<ul class="playerlist" style="margin-left: 15px; font-size: .9em">					
+							</ul>			
+						<div style="float: left;">Game rules:</div><br />			
+							<ul class="rulelist" style="margin-left: 15px; font-size: .9em">					
+							</ul>
+	 				</div><br />
+	 				
+	 				<div id="leavegamebutton" style="float: left;">Leave game</div>
+	 			</div>	
+ 			</div>
+ 			<div id="chatcontainer">
+ 				<div id="lobbychatarea" readonly="readonly"></div>
+ 				<div style="margin-top: 10px; width: 100%">Chat:&nbsp;<input id="lobbychatinput" /></div>
+ 			</div>
+ 		</div>
+ 		<div id="gametable" style="display: none;">
+ 			<div id="backgroundimage" style="background-image: url('Images/background.jpg'); width: 100%; height: 100%; position: absolute; z-index: -100;"></div>
+ 			<div id="faketarget" style="text-align: center; border-style: none;"><p style="display: none;">It's your turn.</p></div>
+ 			<div id="target"></div>
+ 			<div id="currentbidcontainer"></div>
+ 			<div id="bidcontainer" style="display:none">	 			
+	 			<div id="yourbidcontainer"><p>It's your turn to bid: <input style="width: 50px;" id="yourbid"/></p></div>
+	 			<div id="bidbutton">Bid</div> 		
+	 			<div id="passbutton">Pass</div>
+ 			</div>
+ 			<div id="newsfeed"></div>
+ 			<div id="submitkitty" style="display: none">Submit kitty and trump selection</div>
+ 			<div id="trumpselector" style="display: none">
+ 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trump color:
+ 				<div id="trumpoptions">
+ 					<div class="trumpoption" style="background-color: black" trumpcolor="black"></div>
+ 					<div class="trumpoption" style="background-color: #F3B200" trumpcolor="yellow"></div>
+ 					<div class="trumpoption" style="background-color: #E31212" trumpcolor="red"></div>
+ 					<div class="trumpoption" style="background-color: #03A884" trumpcolor="green"></div>
+				</div>
+ 			</div>
+ 			
+ 			<div id="bottomnamecontainer" class="namecontainer"></div>
+ 			<div id="topnamecontainer" class="namecontainer"></div>
+ 			<div id="leftnamecontainer" class="rotatedclockwise namecontainer"></div>
+ 			<div id="rightnamecontainer" class="rotatedcounterclockwise namecontainer"></div>
+ 			
+ 			<img id="bottompulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none; border-style: solid; border-width: 3px;"/>
+ 			<img id="toppulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none; border-style: solid; border-width: 3px;"/>
+ 			<img id="leftpulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none; border-style: solid; border-width: 3px;"/>
+ 			<img id="rightpulsatinggreen" src="Images/pulsatinggreen.gif" style="display: none; border-style: solid; border-width: 3px;"/>
+ 			
+ 			<div id="leftcardscontainer"></div>
+ 			<div id="topcardscontainer"></div>
+ 			<div id="rightcardscontainer"></div>	 			
+ 			<div id="cardscontainer"></div> 			
+ 		</div>
+ 		
+ 		<!-- Dialogs, alertboxes, and other non-page divs -->
+ 		
+ 		<div id="alertbox">
+ 			Please enter a valid name.
+ 		</div>
+ 		
+ 		<div id="creategamedialog" title="Create a new game">
+ 			<fieldset>
+ 				
+ 				<p>Choose your game options and click "Create" to create a new game.</p>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Game name:</p>
+ 					<input id="gamenameinput" style="background-color: white; border-radius: 0px; border-width: 1px;" class="indentedRight" /> 					
+ 				</div>
+ 				
+ 				<div style="clear:both"></div>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Rook card value:</p>
+ 					
+ 					<select id="rookcardvalueinput" class='indentedRight'>
+ 						<option value="low">Low</option>
+ 						<option value="10.5" selected="selected">10.5</option>
+ 						<option value="high">High</option>
+ 					</select>
+ 				</div>
+ 				
+ 				<div style="clear:both"></div>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Rook can be played on first trick:</p>
+ 					<select id="rookplayfirsttrickinput" class='indentedRight'>
+ 						<option value="yes">Yes</option>
+ 						<option value="no">No</option>
+ 					</select>
+ 				</div>
+ 				
+ 				<div style="clear:both"></div>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Trump must be called before viewing kitty:</p>
+ 					<select id="trumpbeforekittyinput" class='indentedRight' disabled="true">
+ 						<option value="no">No</option>
+ 						<option value="yes">Yes</option>
+ 					</select>
+ 				</div>
+ 				
+ 				<div style="clear:both"></div>
+ 				
+ 				<div>
+ 					<p class='indentedLeft'>Play to:</p>
+ 					<select id="playtoinput" class='indentedRight'>
+ 						<option value="single">Single game</option>
+ 						<option value="100">100 points</option>
+ 						<option value="300">300 points</option>
+ 						<option value="500" selected="selected">500 points</option> 						
+ 					</select>
+ 				</div>
+ 				
+ 			</fieldset>
+ 		</div>
+ 		
+ 		<div id="leavegameconfirmationdialog" title="Really leave game?">
+ 			<fieldset>
+ 				Are you sure you want to leave this game?
+ 			</fieldset>
+ 		</div>
+ 		
+	 	<div class="gamedetailstemplate gamedescription" style="display:none;">
+	 		<hr />
+	 		<div class="gamenamecontainer" style="float: left;"></div><br />				
+			<div class="gamestatuscontainer" style="float: left;"></div><br />
+			<div style="float: left;">Players in this game:</div><br />
+				<ul class="playerlist" style="margin-left: 15px; font-size: .9em">					
+				</ul>			
+			<div style="float: left;">Game rules:</div><br />			
+				<ul class="rulelist" style="margin-left: 15px; font-size: .9em">					
+				</ul>
+ 		</div>
+ 		
+ 		<div id="joingamedialog">
+ 			<div id="jointeam1container" style="float:left; width: 200px; text-align: center">
+ 				<strong>Team 1:</strong>
+ 				<div id="team1players"></div>
+ 				<br />
+ 				<div id="jointeam1button" style="font-size: .8em">Join team 1</div>
+ 				<br />
+			</div>
+ 			<div id="jointeam2container" style="float:left; width: 200px; text-align: center">
+ 				<strong>Team 2:</strong>
+ 				<div id="team2players"></div>
+ 				<br />
+ 				<div id="jointeam2button" style="font-size: .8em">Join team 2</div>
+ 				<br />
+ 			</div> 			
+ 		</div>
+ 		
+ 		<div id="confirmbegingamedialog" title="Ready to begin game"></div>
+ 		
+ 		<div id="endgamedialog" title="Game summary" style="text-align: center;"></div>
+ 		<div id="endrounddialog" title="Round summary" style="text-align: center;"></div>
+ 		
+	</body>
 </html>

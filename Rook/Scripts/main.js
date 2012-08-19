@@ -134,7 +134,7 @@ function interpretServerMessage( payload )
 	switch(message.action)
 	{
 		case "log":
-			log("Log: " + message.message);
+			//log("Log: " + message.message);
 			break;
 			
 		case "chat":

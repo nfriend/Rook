@@ -9,7 +9,7 @@ function init() {
 	  }
 	}
 	
-	Server = new FancyWebSocket('ws://127.0.0.1:9300');
+	Server = new FancyWebSocket('ws://ec2-54-245-16-90.us-west-2.compute.amazonaws.com:9300');
 
 	//Let the user know we're connected
 	Server.bind('open', function() {
@@ -95,8 +95,7 @@ function init() {
 							trumpbeforekitty: $("#trumpbeforekittyinput option:selected").val(),
 							playto: $("#playtoinput option:selected").val()
 						}; 
-						message = JSON.stringify(response);	
-						log(printObject(response));					
+						message = JSON.stringify(response);		
 						send( message );
 						}						
 			},
@@ -136,7 +135,6 @@ function init() {
 			response.action = "chat"
 			response.data = $('#lobbychatinput').val(); 
 			message = JSON.stringify(response);
-			log( 'You: ' + response.data, "blue");
 			send( message );
 			$("#lobbychatinput").val("");
 		}
