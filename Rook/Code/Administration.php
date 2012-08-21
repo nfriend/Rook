@@ -737,6 +737,17 @@ function beginGame($thisGame)
 	sendJson($gamePlayers[0], $response);	
 }
 
+function clientDisconnect($clientID)
+{
+	$clientGameInfo = getClientGame($clientID);
+	$game = $clientGameInfo["game"];
+	
+	if (!is_null($game))
+	{
+		$game->PrematureEnd($clientID);
+	}
+}
+
 function confirmClient($clientID)
 {
 	$gameDetails = getClientGame($clientID);

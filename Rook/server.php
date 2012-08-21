@@ -123,12 +123,9 @@ function wsOnOpen($clientID)
 function wsOnClose($clientID, $status) {
 	global $Server;
 	$ip = long2ip( $Server->wsClients[$clientID][6] );
-
-	$Server->log( "$ip ($clientID) has disconnected." );
-
-	//Send a user left notice to everyone in the room
-	foreach ( $Server->wsClients as $id => $client )
-		$Server->wsSend($id, "Visitor $clientID ($ip) has left the room.");
+	
+	clientDisconnect($clientID);
+	
 }
 
 
@@ -141,6 +138,6 @@ $Server->bind('open', 'wsOnOpen');
 $Server->bind('close', 'wsOnClose');
 // for other computers to connect, you will probably need to change this to your LAN IP or external IP,
 // alternatively use: gethostbyaddr(gethostbyname($_SERVER['SERVER_NAME']))
-$Server->wsStartServer('127.0.0.1', 9300);
+$Server->wsStartServer('0.0.0.0', 9300);
 
 ?>

@@ -529,5 +529,31 @@ function init() {
 		}		
 	});
 	
+	$("#abortdialog").dialog({
+		autoOpen: false,
+		modal: true,
+		resizable: false,
+		buttons:
+		{
+			"Back to lobby": function ()
+			{
+				$("#abortdialog").dialog("close");
+				$("#endgamedialog").dialog("close");
+				$("#gametable").css("display", "none");
+				$("#faketarget").css("border-style", "none").css("background-color", "transparent").css("z-index", "49").children("p").css("display", "none");				
+				$("#gameaccordiancontainer").css("display", "");
+				$("#ingamecontainer").css("display", "none");
+				$("#lobby").css("display", "");
+				initializeOtherCards();
+				currentGameId = -1;
+				hand = [];
+				myPlayerNumber = 0;
+				allowedSuits = [];
+				numberOfCardsInTrick = 0;
+				thisGame = null;
+			}
+		}
+	});
+	
 	$(".ui-dialog-titlebar-close").remove();	
 }

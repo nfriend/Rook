@@ -539,6 +539,10 @@ function interpretServerMessage( payload )
 						initializeOtherCards();	
 						
 					break;
+					
+				case "abortgame":
+					$("#abortdialog").dialog("open");					
+					break;
 			}
 			
 			break;

@@ -1077,6 +1077,73 @@ class Game
 			}
 		}
 	}
+
+	function PrematureEnd($quitId)
+	{
+		echo ("clientID: " . (string)$quitId . "\n");				
+		if (!($this->State === "begingame"))
+		{
+			$playerArray = array();		
+					
+			if($this->Team1 && $this->Team1->Player1)
+			{
+				array_push($playerArray, $this->Team1->Player1->ClientID);
+				echo ("adding: " . (string)$this->Team1->Player1->ClientID . "\n");
+			}
+			if($this->Team1 && $this->Team1->Player2)
+			{
+				array_push($playerArray, $this->Team1->Player2->ClientID);
+				echo ("adding: " . (string)$this->Team1->Player2->ClientID . "\n");
+			}
+			if($this->Team2 && $this->Team2->Player1)
+			{
+				array_push($playerArray, $this->Team2->Player1->ClientID);
+				echo ("adding: " . (string)$this->Team2->Player1->ClientID . "\n");
+			}
+			if($this->Team2 && $this->Team2->Player2)
+			{
+				array_push($playerArray, $this->Team2->Player2->ClientID);
+				echo ("adding: " . (string)$this->Team2->Player2->ClientID . "\n");
+			}					
+									
+			foreach($playerArray as $id)
+			{
+				echo ("clientID: " . (string)$id . "\n");	
+				$response = array(
+					"action"=>"command",
+					"message"=>"abortgame",
+					"data"=>""
+				);
+		
+				if ($quitId !== $id && !is_null($id) && $id != "")
+				{
+					echo ("sending to: " . (string)$id . "\n");	
+					sendJson($id, $response);
+				}
+			}
+			
+			if($this->Team1 && $this->Team1->Player1)
+			{					
+				$this->Team1->Player1 = null;			
+			}
+			if($this->Team1 && $this->Team1->Player2)
+			{				
+				$this->Team1->Player2 = null;
+			}
+			if($this->Team2 && $this->Team2->Player1)
+			{
+				$this->Team2->Player1 = null;
+			}
+			if($this->Team2 && $this->Team2->Player2)
+			{	
+				$this->Team2->Player2 = null;
+			}
+		}
+		else
+		{
+			leaveGame($clientId);	
+		}
+	}
 }
 
 class Team
