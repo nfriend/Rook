@@ -535,7 +535,7 @@ function interpretServerMessage( payload )
 						hand = [];
 						allowedSuits = [];
 						numberOfCardsInTrick = 0;
-						$("#faketarget").css("border-style", "none").css("background-color", "transparent").css("z-index", "49").children("p").css("display", "none");
+						$("#faketarget").css("border-style", "none").css("background-color", "transparent").css("z-index", "0").children("p").css("display", "none");						
 						initializeOtherCards();	
 						
 					break;
@@ -1148,6 +1148,7 @@ function blinkDiv(element, toggle)
 
 function initializeOtherCards()
 {
+	$("#topcardscontainer").add("#leftcardscontainer").add("#rightcardscontainer").html("");
 	for(i = 0; i < 10; i++)
 	{			
 		$("#topcardscontainer").append("<img src='Images/cards/CardBackTop.PNG' style='position: absolute; margin-left: -140px; left: " + (i + 1) * (700/10) + "px' />");

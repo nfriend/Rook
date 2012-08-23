@@ -381,7 +381,6 @@ function leaveGame($clientID)
 	}
 }
 
-
 function joinGame($clientID, $gameNumber, $teamNumber)
 {
 	global $gameArray, $Server;
@@ -797,7 +796,7 @@ function checkForFullGame($gameId, $clientID, $sendGameFull = true)
 		{	
 			if($thisGame->State->Location === "lobby")
 			{
-				$thisGame->State->Location === "table";	
+				$thisGame->State->Location = "table";	
 			}		
 			
 			//foreach($gamePlayers as $id)

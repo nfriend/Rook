@@ -25,7 +25,7 @@ function init() {
 
 	//OH NOES! Disconnection occurred.
 	Server.bind('close', function( data ) {
-		log( "Disconnected." );
+		$("#serverdisconnectdialog").dialog("open");
 	});
 
 	//Log any messages sent from server
@@ -533,6 +533,7 @@ function init() {
 		autoOpen: false,
 		modal: true,
 		resizable: false,
+		width: 500,
 		buttons:
 		{
 			"Back to lobby": function ()
@@ -540,7 +541,8 @@ function init() {
 				$("#abortdialog").dialog("close");
 				$("#endgamedialog").dialog("close");
 				$("#gametable").css("display", "none");
-				$("#faketarget").css("border-style", "none").css("background-color", "transparent").css("z-index", "49").children("p").css("display", "none");				
+				$("#faketarget").css("border-style", "none").css("background-color", "transparent").css("z-index", "0").children("p").css("display", "none");
+				$(".played").remove();				
 				$("#gameaccordiancontainer").css("display", "");
 				$("#ingamecontainer").css("display", "none");
 				$("#lobby").css("display", "");
@@ -553,6 +555,13 @@ function init() {
 				thisGame = null;
 			}
 		}
+	});
+	
+	$("#serverdisconnectdialog").dialog({
+		autoOpen: false,
+		modal: true,
+		resizable: false,
+		width: 500
 	});
 	
 	$(".ui-dialog-titlebar-close").remove();	

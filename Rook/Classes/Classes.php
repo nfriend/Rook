@@ -1080,35 +1080,31 @@ class Game
 
 	function PrematureEnd($quitId)
 	{
-		echo ("clientID: " . (string)$quitId . "\n");				
-		if (!($this->State === "begingame"))
-		{
+		global $gameArray;
+							
+		if ($this->State->Location === "table")
+		{		
 			$playerArray = array();		
 					
 			if($this->Team1 && $this->Team1->Player1)
 			{
-				array_push($playerArray, $this->Team1->Player1->ClientID);
-				echo ("adding: " . (string)$this->Team1->Player1->ClientID . "\n");
+				array_push($playerArray, $this->Team1->Player1->ClientId);				
 			}
 			if($this->Team1 && $this->Team1->Player2)
 			{
-				array_push($playerArray, $this->Team1->Player2->ClientID);
-				echo ("adding: " . (string)$this->Team1->Player2->ClientID . "\n");
+				array_push($playerArray, $this->Team1->Player2->ClientId);				
 			}
 			if($this->Team2 && $this->Team2->Player1)
 			{
-				array_push($playerArray, $this->Team2->Player1->ClientID);
-				echo ("adding: " . (string)$this->Team2->Player1->ClientID . "\n");
+				array_push($playerArray, $this->Team2->Player1->ClientId);				
 			}
 			if($this->Team2 && $this->Team2->Player2)
 			{
-				array_push($playerArray, $this->Team2->Player2->ClientID);
-				echo ("adding: " . (string)$this->Team2->Player2->ClientID . "\n");
+				array_push($playerArray, $this->Team2->Player2->ClientId);				
 			}					
 									
 			foreach($playerArray as $id)
-			{
-				echo ("clientID: " . (string)$id . "\n");	
+			{					
 				$response = array(
 					"action"=>"command",
 					"message"=>"abortgame",
@@ -1117,9 +1113,18 @@ class Game
 		
 				if ($quitId !== $id && !is_null($id) && $id != "")
 				{
-					echo ("sending to: " . (string)$id . "\n");	
 					sendJson($id, $response);
 				}
+				
+				$response = array(
+					"action"=>"command",
+					"message"=>"gainpermission"
+				);									
+											
+				if ($quitId !== $id && !is_null($id) && $id != "")
+				{
+					sendJson($id, $response);
+				}	
 			}
 			
 			if($this->Team1 && $this->Team1->Player1)
@@ -1138,10 +1143,15 @@ class Game
 			{	
 				$this->Team2->Player2 = null;
 			}
+			
+			$this->DeleteMe = true;
+			
+			$index = array_search($this, $gameArray);
+			unset($gameArray[$index]);
 		}
 		else
 		{
-			leaveGame($clientId);	
+			leaveGame($quitId);	
 		}
 	}
 }
@@ -1215,6 +1225,8 @@ class Team
 class Player
 {
 	public $ClientID;
+	public $ClientId;
+	
 	public $Name;
 	public $Hand;
 	public $HasPassed;
@@ -1224,6 +1236,8 @@ class Player
 	function Player($id)
 	{
 		$this->ClientId = $id;
+		$this->ClientID = $id;
+		
 		$this->HasPassed = false;
 		$this->Hand = array();
 		$this->Confirmed = false;

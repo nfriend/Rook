@@ -124,6 +124,8 @@ function wsOnClose($clientID, $status) {
 	global $Server;
 	$ip = long2ip( $Server->wsClients[$clientID][6] );
 	
+	$Server->log( "$ip ($clientID) has disconnected." );
+	
 	clientDisconnect($clientID);
 	
 }
