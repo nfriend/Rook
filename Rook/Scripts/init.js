@@ -136,6 +136,7 @@ function init() {
 			response.data = $('#lobbychatinput').val(); 
 			message = JSON.stringify(response);
 			send( message );
+			log( 'You: ' + response.data, "blue");
 			$("#lobbychatinput").val("");
 		}
 	});
@@ -538,8 +539,7 @@ function init() {
 		{
 			"Back to lobby": function ()
 			{
-				$("#abortdialog").dialog("close");
-				$("#endgamedialog").dialog("close");
+				$(".ui-dialog-content").dialog("close");
 				$("#gametable").css("display", "none");
 				$("#faketarget").css("border-style", "none").css("background-color", "transparent").css("z-index", "0").children("p").css("display", "none");
 				$(".played").remove();				
@@ -564,5 +564,17 @@ function init() {
 		width: 500
 	});
 	
-	$(".ui-dialog-titlebar-close").remove();	
+	$("#nowsdialog").dialog({
+		autoOpen: false,
+		modal: true,
+		resizable: false,
+		width: 500	
+	})
+	
+	$(".ui-dialog-titlebar-close").remove();
+	
+	if (!("WebSocket" in window))
+	{
+		$("#nowsdialog").dialog("open");		
+	}	
 }
