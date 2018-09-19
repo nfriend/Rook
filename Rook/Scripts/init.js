@@ -9,7 +9,7 @@ function init() {
 	  }
 	}
 	
-	Server = new FancyWebSocket('ws://ec2-54-245-16-90.us-west-2.compute.amazonaws.com:9300');
+	Server = new FancyWebSocket('wss://nathanfriend.io:9300');
 
 	//Let the user know we're connected
 	Server.bind('open', function() {
