@@ -576,5 +576,9 @@ function init() {
 	if (!("WebSocket" in window))
 	{
 		$("#nowsdialog").dialog("open");		
-	}	
+	}
+	
+	// Added on 2018/09/18 to auto-initialize the web socket server
+	// if it's not already running.
+	$.get('server.php');
 }
